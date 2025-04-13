@@ -29,7 +29,7 @@ const config = {
    /*auto block only for 212 */
   AUTO_BLOCK: process.env.AUTO_BLOCK !== undefined ? process.env.AUTO_BLOCK === 'true' : true,
   /*joel james tech added anti delete cmd*/
-  ANTI_DELETE: process.env.ANTI_DELETE !== undefined ? process.env.ANTI_DELETE === 'true' : false,
+  ANTI_DELETE: process.env.ANTI_DELETE !== undefined ? process.env.ANTI_DELETE === 'true' : true,
   /*lets add auto bot respond*/
   CHAT_BOT: process.env.CHAT_BOT !== undefined ? process.env.CHAT_BOT === 'true' : false,
   /*lets add chat bot mode*/
@@ -40,7 +40,7 @@ const config = {
   NOT_ALLOW: process.env.NOT_ALLOW !== undefined ? process.env.NOT_ALLOW === 'true' : true,
   // codes by  joel james tech
   MODE: process.env.MODE || "public",
-  DELETED_MESSAGES_CHAT_ID: process.env.DELETED_MESSAGES_CHAT_ID || "255767570963",
+  DELETED_MESSAGES_CHAT_ID: process.env.DELETED_MESSAGES_CHAT_ID || "12345678901",
   OWNER_NAME: process.env.OWNER_NAME || "ʟᴏʀᴅ ᴊᴏᴇʟ",
   /* ['255781144539@s.whatsapp.net', '255714595078@s.whatsapp.net']*/
   OWNER_NUMBER: process.env.OWNER_NUMBER || "255714595078",
