@@ -1,186 +1,73 @@
-/*
+//ᴘᴏᴡᴇʀᴇᴅ ʙʏ ʟᴏʀᴅ ᴊᴏᴇʟ
+
+
+
+
 import axios from 'axios';
-import pkg, { prepareWAMessageMedia } from '@whiskeysockets/baileys';
+import pkg from '@whiskeysockets/baileys';
 const { generateWAMessageFromContent, proto } = pkg;
 import config from '../../config.cjs';
 
 const Lyrics = async (m, Matrix) => {
   const prefix = config.PREFIX;
-const cmd = m.body.startsWith(prefix) ? m.body.slice(prefix.length).split(' ')[0].toLowerCase() : '';
-const text = m.body.slice(prefix.length + cmd.length).trim();
-
-  const validCommands = ['lyrics', 'lyric'];
-
-  if (validCommands.includes(cmd)) {
-    if (!text) return m.reply(`Hello *_${m.pushName}_,*\n Here's Example Usage: _.lyrics Spectule|Alan walker._`);
-
-    try {
-      await m.React('🕘');
-      await m.reply('A moment, *ᴊᴏᴇʟ ᴍᴅ* is generating your lyrics request...');
-
-      if (!text.includes('|')) {
-        return m.reply('Please provide the song name and artist name separated by a "|", for example: Spectre|Alan Walker.');
-      }
-
-      const [title, artist] = text.split('|').map(part => part.trim());
-
-      if (!title || !artist) {
-        return m.reply('Both song name and artist name are required. Please provide them in the format: song name|artist name.');
-      }
-
-      const apiUrl = `https://api.lyrics.ovh/v1/${encodeURIComponent(artist)}/${encodeURIComponent(title)}`;
-      const response = await axios.get(apiUrl);
-      const result = response.data;
-
-      if (result && result.lyrics) {
-        const lyrics = result.lyrics;
-
-        let buttons = [{
-            name: "cta_copy",
-            buttonParamsJson: JSON.stringify({
-              display_text: "¢σρу ℓуяι¢ѕ",
-              id: "copy_code",
-              copy_code: lyrics
-            })
-          },
-          {
-            name: "cta_url",
-            buttonParamsJson: JSON.stringify({
-              display_text: "ƒσℓℓσω υѕ",
-              url: `https://whatsapp.com/channel/0029Vak2PevK0IBh2pKJPp2K`
-            })
-          },
-          {
-            name: "quick_reply",
-            buttonParamsJson: JSON.stringify({
-              display_text: "νιєω мєηυ",
-              id: ".menu"
-            })
-          }
-        ];
-
-        let msg = generateWAMessageFromContent(m.from, {
-          viewOnceMessage: {
-            message: {
-              messageContextInfo: {
-                deviceListMetadata: {},
-                deviceListMetadataVersion: 2
-              },
-              interactiveMessage: proto.Message.InteractiveMessage.create({
-                body: proto.Message.InteractiveMessage.Body.create({
-                  text: lyrics
-                }),
-                footer: proto.Message.InteractiveMessage.Footer.create({
-                  text: "> *ρσωєяє∂ ву ℓσя∂ χ ʝσєℓ*"
-                }),
-                header: proto.Message.InteractiveMessage.Header.create({
-                  title: "ʝσєℓ χ∂ ν⁷",
-                  subtitle: "ℓуяι¢ѕ ƒιη∂єя",
-                  hasMediaAttachment: false
-                }),
-                nativeFlowMessage: proto.Message.InteractiveMessage.NativeFlowMessage.create({
-                  buttons: buttons
-                })
-              })
-            }
-          }
-        }, {});
-
-        await Matrix.relayMessage(msg.key.remoteJid, msg.message, {
-          messageId: msg.key.id
-        });
-
-        await m.React('✅');
-      } else {
-        throw new Error('Invalid response from the Lyrics API.');
-      }
-    } catch (error) {
-      console.error('Error getting lyrics:', error.message);
-      m.reply('Error getting lyrics.');
-      await m.React('❌');
-    }
-  }
-};
-
-export default Lyrics;
-*/
-import axios from 'axios';
-import pkg, { prepareWAMessageMedia } from '@whiskeysockets/baileys';
-const { generateWAMessageFromContent, proto } = pkg;
-import config from '../../config.cjs';
-
-const Lyrics = async (m, Matrix) => {
-  const prefix = config.PREFIX;
-  const cmd = m.body.startsWith(prefix) ? m.body.slice(prefix.length).split(' ')[0].toLowerCase() : '';
+  const cmd = m.body.startsWith(prefix)
+    ? m.body.slice(prefix.length).split(' ')[0].toLowerCase()
+    : '';
   const text = m.body.slice(prefix.length + cmd.length).trim();
 
   const validCommands = ['lyrics', 'lyric'];
 
   if (validCommands.includes(cmd)) {
-    if (!text) return m.reply(`Hello *_${m.pushName}_,*\n Here's Example Usage: _.lyrics Spectule|Alan walker._`);
+    if (!text)
+      return m.reply(`Hewwooo *_${m.pushName}_*~!\nWanna feel the magic of a song?\n\nTry like this:\n*.lyrics Lavender Haze Taylor Swift*\n*.lyrics Despacito*\n\nI'll go flutter off and find it for you~ *teehee*`);
 
     try {
-      await m.React('🕘');
-      await m.reply('A moment, *ᴊᴏᴇʟ ᴍᴅ* is generating your lyrics request...');
+      await m.React('⏳');
+      await m.reply('✨ Just a sec sweet bean... flying to fetch your lyrics~ ✨');
 
-      if (!text.includes('|')) {
-        return m.reply('Please provide the song name and artist name separated by a "|", for example: Spectre|Alan Walker.');
+      const parts = text.split(' ');
+      let title = '';
+      let artist = '';
+
+      if (parts.length === 1) {
+        title = parts[0];
+      } else if (parts.length === 2) {
+        title = parts[0];
+        artist = parts[1];
+      } else {
+        const possibleArtist = parts.slice(-2).join(' ');
+        const possibleTitle = parts.slice(0, -2).join(' ');
+
+        title = possibleTitle || parts.slice(0, -1).join(' ');
+        artist = possibleArtist;
       }
 
-      const [title, artist] = text.split('|').map(part => part.trim());
+      const apiUrl = artist
+        ? `https://api.lyrics.ovh/v1/${encodeURIComponent(artist)}/${encodeURIComponent(title)}`
+        : `https://api.lyrics.ovh/v1//${encodeURIComponent(title)}`;
 
-      if (!title || !artist) {
-        return m.reply('Both song name and artist name are required. Please provide them in the format: song name|artist name.');
-      }
-
-      const apiUrl = `https://api.lyrics.ovh/v1/${encodeURIComponent(artist)}/${encodeURIComponent(title)}`;
       const response = await axios.get(apiUrl);
       const result = response.data;
 
       if (result && result.lyrics) {
-        const lyrics = result.lyrics;
+        const lyrics = result.lyrics.length > 4000
+          ? result.lyrics.slice(0, 4000) + '\n\n(｡•́︿•̀｡) It was suuuper long so I trimmed it a lil~'
+          : result.lyrics;
 
-        let msg = generateWAMessageFromContent(m.from, {
-          viewOnceMessage: {
-            message: {
-              messageContextInfo: {
-                deviceListMetadata: {},
-                deviceListMetadataVersion: 2
-              },
-              interactiveMessage: proto.Message.InteractiveMessage.create({
-                body: proto.Message.InteractiveMessage.Body.create({
-                  text: lyrics
-                }),
-                footer: proto.Message.InteractiveMessage.Footer.create({
-                  text: "> *ρσωєя∂ ву ℓσя∂ χ ʝσєℓ*"
-                }),
-                header: proto.Message.InteractiveMessage.Header.create({
-                  title: "ʝσєℓ χ∂ ν⁷",
-                  subtitle: "ℓуяι¢ѕ ƒιη∂єя",
-                  hasMediaAttachment: false
-                }),
-                nativeFlowMessage: proto.Message.InteractiveMessage.NativeFlowMessage.create({
-                  // No buttons here
-                })
-              })
-            }
-          }
-        }, {});
+        const sparkleMsg = `*･ﾟ✧*:･ﾟ✧\n`;
+        const footer = `\n\n— 🧚‍♀️ With love from your tiny lyrics fairy ~`;
 
-        await Matrix.relayMessage(msg.key.remoteJid, msg.message, {
-          messageId: msg.key.id
-        });
-
-        await m.React('✅');
+        await m.reply(`${sparkleMsg}*~ Here’s your song, starshine ~*\n\n*🎶 Title:* _${title}_\n*🎤 Artist:* _${artist || '???'}_\n\n${lyrics}${footer}`);
+        await m.React('💖');
       } else {
-        throw new Error('Invalid response from the Lyrics API.');
+        throw new Error('Lyrics not found.');
       }
     } catch (error) {
-      console.error('Error getting lyrics:', error.message);
-      m.reply('Error getting lyrics.');
-      await m.React('❌');
+      console.error('Lyrics error:', error.message);
+      m.reply("Oh noes~ I flapped my wings but couldn't find that song... maybe try again, okay cutie?");
+      await m.React('🥺');
     }
   }
 };
-// codes by joeljamestech2 
+
 export default Lyrics;
