@@ -49,30 +49,26 @@ const chatbotCommand = async (m, Matrix) => {
         const userMessage = text;
 
         // Make the API call to the chatbot service
-        const response = await fetch(`https://api.paxsenix.biz.id/ai/gemini-realtime?text=${encodeURIComponent(userMessage)}&session_id=ZXlKaklqb2lZMTg0T0RKall6TTNNek13TVdFNE1qazNJaXdpY2lJNkluSmZNbU01TUdGa05ETmtNVFF3WmpNNU5pSXNJbU5vSWpvaWNtTmZZVE16TURWaE1qTmpNR1ExTnpObFl5Sjk`);
+        const response = await fetch(`https://apis.davidcyriltech.my.id/ai/chatbot?query=${encodeURIComponent(userMessage)}`);
 
         if (!response.ok) {
             throw new Error(`HTTP error! status: ${response.status}`);
         }
 
         const responseData = await response.json();
-        const joelReply = responseData.message || 'Oops! I couldn’t quite catch that 😅. Can you try again?';
+        const joelReply = responseData.result || 'Oops! I couldn’t quite catch that 😅. Can you try again?';
         
         // Adding a cute message format with extra charm and emojis
-        const formattedReply = `*${joelReply}*`;
+        const joelXbot = `*${joelReply}*`;
 
         // Send the AI response to the user
-        await Matrix.sendMessage(senderId, { text: formattedReply }, { quoted: m });
+        await Matrix.sendMessage(senderId, { text: joelXbot }, { quoted: m });
 
     } catch (err) {
         console.error('Error fetching AI response:', err.message);
         await Matrix.sendMessage(senderId, { text: '❌ Oh no, something went wrong. Please try again later! 💔' }, { quoted: m });
     }
 };
-
+// codes by new lord joeljamestech (enjoy)
 export default chatbotCommand;
-/*
-result 
-https://apis.davidcyriltech.my.id/ai/chatbot?query=${encodeURIComponent(userMessage)}
-
-*\
+    
