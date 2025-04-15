@@ -49,14 +49,14 @@ const chatbotCommand = async (m, Matrix) => {
         const userMessage = text;
 
         // Make the API call to the chatbot service
-        const response = await fetch(`https://apis.davidcyriltech.my.id/ai/chatbot?query=${encodeURIComponent(userMessage)}`);
+        const response = await fetch(`https://api.paxsenix.biz.id/ai/gemini-realtime?text=${encodeURIComponent(userMessage)}&session_id=ZXlKaklqb2lZMTg0T0RKall6TTNNek13TVdFNE1qazNJaXdpY2lJNkluSmZNbU01TUdGa05ETmtNVFF3WmpNNU5pSXNJbU5vSWpvaWNtTmZZVE16TURWaE1qTmpNR1ExTnpObFl5Sjk`);
 
         if (!response.ok) {
             throw new Error(`HTTP error! status: ${response.status}`);
         }
 
         const responseData = await response.json();
-        const joelReply = responseData.result || 'Oops! I couldn’t quite catch that 😅. Can you try again?';
+        const joelReply = responseData.message || 'Oops! I couldn’t quite catch that 😅. Can you try again?';
         
         // Adding a cute message format with extra charm and emojis
         const formattedReply = `*${joelReply}*`;
@@ -72,3 +72,4 @@ const chatbotCommand = async (m, Matrix) => {
 // codes by lord joel 
 export default chatbotCommand;
     
+//https://api.paxsenix.biz.id/ai/gemini-realtime?text=remember%20my%20name%20&session_id=ZXlKaklqb2lZMTg0T0RKall6TTNNek13TVdFNE1qazNJaXdpY2lJNkluSmZNbU01TUdGa05ETmtNVFF3WmpNNU5pSXNJbU5vSWpvaWNtTmZZVE16TURWaE1qTmpNR1ExTnpObFl5Sjk
