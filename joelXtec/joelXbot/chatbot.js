@@ -59,16 +59,16 @@ const chatbotCommand = async (m, Matrix) => {
         const joelReply = responseData.result || 'Oops! I couldn’t quite catch that 😅. Can you try again?';
         
         // Adding a cute message format with extra charm and emojis
-        const joelXbot = `*${joelReply}*`;
+        const formattedReply = `*${joelReply}*`;
 
         // Send the AI response to the user
-        await Matrix.sendMessage(senderId, { text: joelXbot }, { quoted: m });
+        await Matrix.sendMessage(senderId, { text: formattedReply }, { quoted: m });
 
     } catch (err) {
         console.error('Error fetching AI response:', err.message);
         await Matrix.sendMessage(senderId, { text: '❌ Oh no, something went wrong. Please try again later! 💔' }, { quoted: m });
     }
 };
-// codes by new lord joeljamestech (enjoy)
+// codes by lord joel 
 export default chatbotCommand;
     
