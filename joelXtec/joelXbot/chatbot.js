@@ -59,7 +59,7 @@ const chatbotCommand = async (m, Matrix) => {
         const joelReply = responseData.message || 'Oops! I couldn’t quite catch that 😅. Can you try again?';
         
         // Adding a cute message format with extra charm and emojis
-        const formattedReply = `*${joelReply}*`;
+        const formattedReply = `${joelReply}`;
 
         // Send the AI response to the user
         await Matrix.sendMessage(senderId, { text: formattedReply }, { quoted: m });
