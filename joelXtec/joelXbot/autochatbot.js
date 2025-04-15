@@ -46,7 +46,7 @@ const autotypingCommand = async (m, Matrix) => {
   const text = m.body.slice(prefix.length + cmd.length).trim();
 
   // List of all commands that should toggle the chatbot state
-  const validCommands = ['chatbot', 'lydea', 'lydia', 'bot', 'automreply'];
+  const validCommands = ['chatbot', 'lydea', 'lydia', 'answer', 'automreply'];
 
   // Check if the command is in the list of valid commands
   if (validCommands.includes(cmd)) {
