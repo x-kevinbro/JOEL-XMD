@@ -74,7 +74,7 @@ const deepseek = async (m, Matrix) => {
 
             await m.React("⏳");
 
-            const apiUrl = `https://apis.davidcyriltech.my.id/ai/chatbot?query=${encodeURIComponent(prompt)}`;
+            const apiUrl = `https://api.paxsenix.biz.id/ai/gemini-realtime?text=${encodeURIComponent(userMessage)}&session_id=ZXlKaklqb2lZMTg0T0RKall6TTNNek13TVdFNE1qazNJaXdpY2lJNkluSmZNbU01TUdGa05ETmtNVFF3WmpNNU5pSXNJbU5vSWpvaWNtTmZZVE16TURWaE1qTmpNR1ExTnpObFl5Sjk`;
             const response = await fetch(apiUrl);
 
             if (!response.ok) {
@@ -82,7 +82,7 @@ const deepseek = async (m, Matrix) => {
             }
 
             const responseData = await response.json();
-            const answer = responseData.result;
+            const answer = responseData.message;
 
             await updateChatHistory(chatHistory, m.sender, { role: "user", content: prompt });
             await updateChatHistory(chatHistory, m.sender, { role: "assistant", content: answer });
