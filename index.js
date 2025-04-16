@@ -170,7 +170,7 @@ async function init() {
 
 init();
 
-app.get('/mydata/', (req, res) => {
+app.get('mydata', (req, res) => {
     res.sendFile(path.join(__dirname, 'index.html'));
 });
 
