@@ -1,10 +1,7 @@
 
 
-
-<a><img src='https://i.imgur.com/LyHic3i.gif'/></a>
-
 <img alt="lord joel"
-src="https://i.ibb.co/8DcCtqXM/shaban-md.webp"/>
+src="mydata/media/joelXtec.jpg"/>
 
 
 
@@ -40,7 +37,7 @@ src="https://i.ibb.co/8DcCtqXM/shaban-md.webp"/>
 
 
 
-<a href='https://session-site-navy.vercel.app' target="_blank"><img alt='joel' src='https://img.shields.io/badge/PAIR CODE-h?color=navy&style=for-the-badge&logo=visualstudiocode'/></a></p>
+<a href='https://joel-xmd-pair-joelbot-d392f3b60559.herokuapp.com' target="_blank"><img alt='joel' src='https://img.shields.io/badge/PAIR CODE-h?color=navy&style=for-the-badge&logo=visualstudiocode'/></a></p>
 
 
  
