@@ -2,26 +2,25 @@ import fs from 'fs';
 import pkg from '@whiskeysockets/baileys';
 const { proto, downloadContentFromMessage } = pkg;
 
-const { default: config } = await import('../../config.cjs');
 
-const joelContext = {
+const demonContext = {
   forwardingScore: 999,
   isForwarded: true,
   forwardedNewsletterMessageInfo: {
     newsletterJid: '120363317462952356@newsletter',
-    newsletterName: "✨ ᴊᴏᴇʟ xᴍᴅ ʙᴏᴛ ✨",
+    newsletterName: "ᴊᴏᴇʟ xᴅ ʙᴏᴛ ᴠ ⁷",
     serverMessageId: 143
   }
 };
 
 // ==========================
-//    ʟᴏʀᴅ ᴊᴏᴇʟ ᴘʀᴏᴛᴇᴄᴛᴏʀ ᴄʟᴀss
+//   CLASS: AntiDelete Core
 // ==========================
-class JoelAntiDelete {
+class DemonAntiDelete {
   constructor() {
-    this.enabled = config.ANTI_DELETE;
+    this.enabled = false;
     this.messageCache = new Map();
-    this.cacheExpiry = 5 * 60 * 1000;
+    this.cacheExpiry = 5 * 60 * 1000; // 5 minutes
     this.cleanupInterval = setInterval(() => this.cleanExpiredMessages(), this.cacheExpiry);
   }
 
@@ -35,8 +34,8 @@ class JoelAntiDelete {
   }
 
   formatTime(timestamp) {
-    return new Date(timestamp).toLocaleString('en-PK', {
-      timeZone: 'Asia/Karachi',
+    const options = {
+      timeZone: 'Asia/Karachi', // Demon-Slayer HQ timezone
       year: 'numeric',
       month: 'short',
       day: 'numeric',
@@ -44,12 +43,16 @@ class JoelAntiDelete {
       minute: '2-digit',
       second: '2-digit',
       hour12: true
-    }) + ' ⏳';
+    };
+    return new Date(timestamp).toLocaleString('en-PK', options) + ' (PKT)';
   }
 }
 
-const antiDelete = new JoelAntiDelete();
-const statusPath = './joel_antidelete.json';
+// ==========================
+//     SETUP & CONFIG FILE
+// ==========================
+const demonDelete = new DemonAntiDelete();
+const statusPath = './demon_antidelete.json';
 
 let statusData = {};
 if (fs.existsSync(statusPath)) {
@@ -58,97 +61,178 @@ if (fs.existsSync(statusPath)) {
 if (!statusData.chats) statusData.chats = {};
 
 // ==========================
-//         ᴄᴜᴛᴇ ʜᴀɴᴅʟᴇʀ
+//   MAIN HANDLER FUNCTION
 // ==========================
 const AntiDelete = async (m, Matrix) => {
-  if (!config.ANTI_DELETE) return;
-
   const chatId = m.from;
-  const prefix = config.PREFIX;
-
   const formatJid = (jid) => jid ? jid.replace(/@s\.whatsapp\.net|@g\.us/g, '') : 'Unknown';
 
   const getChatInfo = async (jid) => {
-    if (!jid) return { name: 'Unknown Realm', isGroup: false };
+    if (!jid) return { name: 'Unknown Chat', isGroup: false };
     if (jid.includes('@g.us')) {
       try {
         const groupMetadata = await Matrix.groupMetadata(jid);
         return {
-          name: groupMetadata?.subject || 'Joel’s Cute Castle',
+          name: groupMetadata?.subject || 'Demon Slayer Corps',
           isGroup: true
         };
       } catch {
-        return { name: 'Joel’s Cute Castle', isGroup: true };
+        return { name: 'Demon Slayer Corps', isGroup: true };
       }
     }
-    return { name: 'Private Realm', isGroup: false };
+    return { name: 'Private Mission', isGroup: false };
   };
 
-  // Command handling
-  const command = m.body.toLowerCase();
-  if (command === `${prefix}antidelete on` || command === `${prefix}antidelete off`) {
+  // ==========================
+  //    TOGGLE ANTIDELETE
+  // ==========================
+  if (m.body.toLowerCase() === 'antidelete on' || m.body.toLowerCase() === 'antidelete off') {
     const responses = {
       on: {
-        text: `✨ *ᴊᴏᴇʟ xᴍᴅ ᴀɴᴛɪ-ᴅᴇʟᴇᴛᴇ ᴀᴄᴛɪᴠᴀᴛᴇᴅ!* ✨\n\n` +
-              `• ᴘʀᴏᴛᴇᴄᴛɪᴏɴ: *ᴇɴᴀʙʟᴇᴅ*\n` +
-              `• ᴄᴀᴄʜᴇ ᴛɪᴍᴇ: *5 ᴍɪɴᴜᴛᴇs*\n` +
-              `• sᴄᴏᴘᴇ: *ᴀʟʟ ʀᴇᴀʟᴍs*\n\n` +
-              `_ʀᴇᴄᴏᴠᴇʀɪɴɢ ᴠᴀɴɪsʜᴇᴅ ᴍᴇssᴀɢᴇs..._\n\n` +
-              `ꜱᴛᴀʏ ᴄᴜᴛᴇ ~ ᴊᴏᴇʟ ʟᴏᴠᴇs ʏᴏᴜ\n\n(ᴘᴏᴡᴇʀᴇᴅ ʙʏ ʟᴏʀᴅ ᴊᴏᴇʟ)`,
-        contextInfo: joelContext
+        text: `🗡️ *Demon-Slayer Anti-Delete Activated*\n\n` +
+              `• Protection: *Enabled*\n` +
+              `• Cache: *5 minutes*\n` +
+              `• Scope: *All Chats*\n\n` +
+              `_Deleted messages will now be recovered_\n\n` +
+              `⚔️ *Demon Slayer Corps*`,
+        contextInfo: demonContext
       },
       off: {
-        text: `💤 *ᴊᴏᴇʟ xᴍᴅ ᴀɴᴛɪ-ᴅᴇʟᴇᴛᴇ ᴅɪsᴀʙʟᴇᴅ*\n\n` +
-              `_sᴀʏ ɢᴏᴏᴅʙʏᴇ ᴛᴏ ʀᴇᴄᴏᴠᴇʀʏ ᴍᴀɢɪᴄ_\n\n(ᴘᴏᴡᴇʀᴇᴅ ʙʏ ʟᴏʀᴅ ᴊᴏᴇʟ)`,
-        contextInfo: joelContext
+        text: `🌑 *Demon-Slayer Anti-Delete Deactivated*\n\n` +
+              `_Message recovery is now disabled_\n\n` +
+              `⚔️ *Demon Slayer Corps*`,
+        contextInfo: demonContext
       }
     };
 
-    if (command === `${prefix}antidelete on`) {
+    if (m.body.toLowerCase() === 'antidelete on') {
       statusData.chats[chatId] = true;
       fs.writeFileSync(statusPath, JSON.stringify(statusData, null, 2));
-      await Matrix.sendMessage(chatId, responses.on, { quoted: m });
+      demonDelete.enabled = true;
+      await Matrix.sendMessage(m.from, responses.on, { quoted: m });
     } else {
       statusData.chats[chatId] = false;
       fs.writeFileSync(statusPath, JSON.stringify(statusData, null, 2));
-      antiDelete.messageCache.clear();
-      await Matrix.sendMessage(chatId, responses.off, { quoted: m });
+      demonDelete.enabled = false;
+      demonDelete.messageCache.clear();
+      await Matrix.sendMessage(m.from, responses.off, { quoted: m });
     }
 
-    await Matrix.sendReaction(chatId, m.key, '💫');
+    await Matrix.sendReaction(m.from, m.key, '🗡️');
     return;
   }
 
-  // Cache every incoming message
-  if (statusData.chats[chatId]) {
-    const keyId = m.key.id;
-    antiDelete.messageCache.set(keyId, {
-      message: m.message,
-      sender: m.key.participant || m.key.remoteJid,
-      timestamp: Date.now(),
-      pushName: m.pushName || 'Unknown',
-      chatId
-    });
-  }
+  // ==========================
+  //    CACHE INCOMING MSGS
+  // ==========================
+  Matrix.ev.on('messages.upsert', async ({ messages }) => {
+    if (!demonDelete.enabled || !messages?.length) return;
 
-  // Recover deleted messages
-  if (m.message?.protocolMessage?.type === 0 && statusData.chats[chatId]) {
-    const deletedKey = m.message.protocolMessage.key.id;
-    const original = antiDelete.messageCache.get(deletedKey);
+    for (const msg of messages) {
+      if (msg.key.fromMe || !msg.message || msg.key.remoteJid === 'status@broadcast') continue;
 
-    if (original) {
-      const chatInfo = await getChatInfo(chatId);
-      const caption = `🗑️ *ᴍᴇssᴀɢᴇ ʀᴇᴄᴏᴠᴇʀᴇᴅ!*\n\n` +
-                      `• *ғʀᴏᴍ:* ${original.pushName}\n` +
-                      `• *ᴄʜᴀᴛ:* ${chatInfo.name}\n` +
-                      `• *ᴛɪᴍᴇ:* ${antiDelete.formatTime(original.timestamp)}\n\n` +
-                      `✉️ _ᴏʀɪɢɪɴᴀʟ ᴍᴇssᴀɢᴇ ʙᴇʟᴏᴡ:_`;
+      try {
+        const content = msg.message.conversation ||
+          msg.message.extendedTextMessage?.text ||
+          msg.message.imageMessage?.caption ||
+          msg.message.videoMessage?.caption ||
+          msg.message.documentMessage?.caption;
 
-      await Matrix.sendMessage(chatId, { text: caption, contextInfo: joelContext });
-      await Matrix.sendMessage(chatId, { forward: original.message }, { quoted: m });
-      antiDelete.messageCache.delete(deletedKey);
+        let media, type, mimetype;
+        const mediaTypes = ['image', 'video', 'audio', 'sticker', 'document'];
+
+        for (const mediaType of mediaTypes) {
+          if (msg.message[`${mediaType}Message`]) {
+            const mediaMsg = msg.message[`${mediaType}Message`];
+            try {
+              const stream = await downloadContentFromMessage(mediaMsg, mediaType);
+              let buffer = Buffer.from([]);
+              for await (const chunk of stream) buffer = Buffer.concat([buffer, chunk]);
+              media = buffer;
+              type = mediaType;
+              mimetype = mediaMsg.mimetype;
+              break;
+            } catch {}
+          }
+        }
+
+        if (msg.message.audioMessage?.ptt) {
+          try {
+            const stream = await downloadContentFromMessage(msg.message.audioMessage, 'audio');
+            let buffer = Buffer.from([]);
+            for await (const chunk of stream) buffer = Buffer.concat([buffer, chunk]);
+            media = buffer;
+            type = 'voice';
+            mimetype = msg.message.audioMessage.mimetype;
+          } catch {}
+        }
+
+        if (content || media) {
+          demonDelete.messageCache.set(msg.key.id, {
+            content,
+            media,
+            type,
+            mimetype,
+            sender: msg.key.participant || msg.key.remoteJid,
+            senderFormatted: `@${formatJid(msg.key.participant || msg.key.remoteJid)}`,
+            timestamp: Date.now(),
+            chatJid: msg.key.remoteJid
+          });
+        }
+      } catch {}
     }
-  }
+  });
+
+  // ==========================
+  //     RESTORE DELETED
+  // ==========================
+  Matrix.ev.on('messages.update', async (updates) => {
+    if (!demonDelete.enabled || !updates?.length) return;
+
+    for (const update of updates) {
+      try {
+        const { key, update: updateData } = update;
+        const isDeleted = updateData?.messageStubType === proto.WebMessageInfo.StubType.REVOKE ||
+          updateData?.status === proto.WebMessageInfo.Status.DELETED;
+
+        if (!isDeleted || key.fromMe || !demonDelete.messageCache.has(key.id)) continue;
+
+        const cachedMsg = demonDelete.messageCache.get(key.id);
+        demonDelete.messageCache.delete(key.id);
+
+        const chatInfo = await getChatInfo(cachedMsg.chatJid);
+        const deletedBy = updateData?.participant ?
+          `@${formatJid(updateData.participant)}` :
+          (key.participant ? `@${formatJid(key.participant)}` : 'Unknown Demon');
+
+        const messageType = cachedMsg.type ?
+          cachedMsg.type.charAt(0).toUpperCase() + cachedMsg.type.slice(1) :
+          'Demon Message';
+
+        const baseInfo = `🗡️ *Demon-Slayer: Recovered Deleted ${messageType}*\n\n` +
+          `👤 *Slayer:* ${cachedMsg.senderFormatted}\n` +
+          `⚔️ *Deleted By:* ${deletedBy}\n` +
+          `📍 *Location:* ${chatInfo.name}${chatInfo.isGroup ? ' (Demon Nest)' : ''}\n` +
+          `🕒 *Sent At:* ${demonDelete.formatTime(cachedMsg.timestamp)}\n` +
+          `⏱️ *Deleted At:* ${demonDelete.formatTime(Date.now())}\n\n` +
+          `_Demon Slayer Corps Mission Log_`;
+
+        if (cachedMsg.media) {
+          await Matrix.sendMessage(cachedMsg.chatJid, {
+            [cachedMsg.type]: cachedMsg.media,
+            mimetype: cachedMsg.mimetype,
+            caption: baseInfo,
+            contextInfo: demonContext
+          });
+        } else if (cachedMsg.content) {
+          await Matrix.sendMessage(cachedMsg.chatJid, {
+            text: `${baseInfo}\n\n📜 *Message Scroll:* \n${cachedMsg.content}`,
+            contextInfo: demonContext
+          });
+        }
+      } catch {}
+    }
+  });
 };
 
 export default AntiDelete;
