@@ -39,7 +39,10 @@ const wallpaperCmd = async (m, sock) => {
       await sock.sendMessage(m.from, { react: { text: "⏳", key: m.key } });
 
       const res = await axios.get('https://apis.davidcyriltech.my.id/hentai');
-      const joelUrl = res?.data?.video_1;
+      const { data } = await axios.get(apiUrl, { timeout: 20000 });
+      const joelUrl = data.video_1;
+      const title = data.title || query;
+      const thumbnail = data.thumb || 'https://raw.githubusercontent.com/joeljamestech2/JOEL-XMD/refs/heads/main/mydata/media/joelXbot.jpg';
 
       if (!joelUrl) {
         throw new Error("No video URL found in API response");
