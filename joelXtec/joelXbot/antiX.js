@@ -57,9 +57,12 @@ if (fs.existsSync(statusPath)) {
 }
 if (!statusData.chats) statusData.chats = {};
 
-const AntiDelete = async (m, Matrix) => {
-  if (!antiDeleteGlobal) return;
+// Automatically enable anti-delete if globally enabled
+if (antiDeleteGlobal) {
+  demonDelete.enabled = true;
+}
 
+const AntiDelete = async (m, Matrix) => {
   const chatId = m.from;
   const formatJid = (jid) => jid ? jid.replace(/@s\.whatsapp\.net|@g\.us/g, '') : 'Unknown';
 
@@ -116,7 +119,8 @@ const AntiDelete = async (m, Matrix) => {
   }
 
   Matrix.ev.on('messages.upsert', async ({ messages }) => {
-    if (!demonDelete.enabled || !messages?.length) return;
+    if (!antiDeleteGlobal && !demonDelete.enabled) return;
+    if (!messages?.length) return;
 
     for (const msg of messages) {
       if (msg.key.fromMe || !msg.message || msg.key.remoteJid === 'status@broadcast') continue;
@@ -174,7 +178,8 @@ const AntiDelete = async (m, Matrix) => {
   });
 
   Matrix.ev.on('messages.update', async (updates) => {
-    if (!demonDelete.enabled || !updates?.length) return;
+    if (!antiDeleteGlobal && !demonDelete.enabled) return;
+    if (!updates?.length) return;
 
     for (const update of updates) {
       try {
