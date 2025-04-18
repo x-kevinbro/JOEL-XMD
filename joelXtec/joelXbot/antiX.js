@@ -64,6 +64,8 @@ const AntiDelete = async (m, Matrix) => {
   if (!config.ANTI_DELETE) return;
 
   const chatId = m.from;
+  const prefix = config.PREFIX;
+
   const formatJid = (jid) => jid ? jid.replace(/@s\.whatsapp\.net|@g\.us/g, '') : 'Unknown';
 
   const getChatInfo = async (jid) => {
@@ -82,7 +84,9 @@ const AntiDelete = async (m, Matrix) => {
     return { name: 'Private Realm', isGroup: false };
   };
 
-  if (m.body.toLowerCase() === 'antidelete on' || m.body.toLowerCase() === 'antidelete off') {
+  // Command handling
+  const command = m.body.toLowerCase();
+  if (command === `${prefix}antidelete on` || command === `${prefix}antidelete off`) {
     const responses = {
       on: {
         text: `✨ *ᴊᴏᴇʟ xᴍᴅ ᴀɴᴛɪ-ᴅᴇʟᴇᴛᴇ ᴀᴄᴛɪᴠᴀᴛᴇᴅ!* ✨\n\n` +
@@ -100,25 +104,51 @@ const AntiDelete = async (m, Matrix) => {
       }
     };
 
-    if (m.body.toLowerCase() === 'antidelete on') {
+    if (command === `${prefix}antidelete on`) {
       statusData.chats[chatId] = true;
       fs.writeFileSync(statusPath, JSON.stringify(statusData, null, 2));
-      antiDelete.enabled = true;
-      await Matrix.sendMessage(m.from, responses.on, { quoted: m });
+      await Matrix.sendMessage(chatId, responses.on, { quoted: m });
     } else {
       statusData.chats[chatId] = false;
       fs.writeFileSync(statusPath, JSON.stringify(statusData, null, 2));
-      antiDelete.enabled = false;
       antiDelete.messageCache.clear();
-      await Matrix.sendMessage(m.from, responses.off, { quoted: m });
+      await Matrix.sendMessage(chatId, responses.off, { quoted: m });
     }
 
-    await Matrix.sendReaction(m.from, m.key, '💫');
+    await Matrix.sendReaction(chatId, m.key, '💫');
     return;
   }
 
-  // continue with message caching & restore...
-  // [The rest of the message storing and restore logic remains the same]
+  // Cache every incoming message
+  if (statusData.chats[chatId]) {
+    const keyId = m.key.id;
+    antiDelete.messageCache.set(keyId, {
+      message: m.message,
+      sender: m.key.participant || m.key.remoteJid,
+      timestamp: Date.now(),
+      pushName: m.pushName || 'Unknown',
+      chatId
+    });
+  }
+
+  // Recover deleted messages
+  if (m.message?.protocolMessage?.type === 0 && statusData.chats[chatId]) {
+    const deletedKey = m.message.protocolMessage.key.id;
+    const original = antiDelete.messageCache.get(deletedKey);
+
+    if (original) {
+      const chatInfo = await getChatInfo(chatId);
+      const caption = `🗑️ *ᴍᴇssᴀɢᴇ ʀᴇᴄᴏᴠᴇʀᴇᴅ!*\n\n` +
+                      `• *ғʀᴏᴍ:* ${original.pushName}\n` +
+                      `• *ᴄʜᴀᴛ:* ${chatInfo.name}\n` +
+                      `• *ᴛɪᴍᴇ:* ${antiDelete.formatTime(original.timestamp)}\n\n` +
+                      `✉️ _ᴏʀɪɢɪɴᴀʟ ᴍᴇssᴀɢᴇ ʙᴇʟᴏᴡ:_`;
+
+      await Matrix.sendMessage(chatId, { text: caption, contextInfo: joelContext });
+      await Matrix.sendMessage(chatId, { forward: original.message }, { quoted: m });
+      antiDelete.messageCache.delete(deletedKey);
+    }
+  }
 };
 
 export default AntiDelete;
