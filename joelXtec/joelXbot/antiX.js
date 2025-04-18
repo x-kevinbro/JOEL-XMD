@@ -1,7 +1,10 @@
 import fs from 'fs';
+import config from '../../config.cjs';
 import pkg from '@whiskeysockets/baileys';
 const { proto, downloadContentFromMessage } = pkg;
 
+const prefix = config.PREFIX;
+const antiDeleteGlobal = config.ANTI_DELETE;
 
 const demonContext = {
   forwardingScore: 999,
@@ -13,9 +16,6 @@ const demonContext = {
   }
 };
 
-// ==========================
-//   CLASS: AntiDelete Core
-// ==========================
 class DemonAntiDelete {
   constructor() {
     this.enabled = false;
@@ -35,7 +35,7 @@ class DemonAntiDelete {
 
   formatTime(timestamp) {
     const options = {
-      timeZone: 'Asia/Karachi', // Demon-Slayer HQ timezone
+      timeZone: 'Asia/Karachi',
       year: 'numeric',
       month: 'short',
       day: 'numeric',
@@ -48,9 +48,6 @@ class DemonAntiDelete {
   }
 }
 
-// ==========================
-//     SETUP & CONFIG FILE
-// ==========================
 const demonDelete = new DemonAntiDelete();
 const statusPath = './demon_antidelete.json';
 
@@ -60,10 +57,9 @@ if (fs.existsSync(statusPath)) {
 }
 if (!statusData.chats) statusData.chats = {};
 
-// ==========================
-//   MAIN HANDLER FUNCTION
-// ==========================
 const AntiDelete = async (m, Matrix) => {
+  if (!antiDeleteGlobal) return;
+
   const chatId = m.from;
   const formatJid = (jid) => jid ? jid.replace(/@s\.whatsapp\.net|@g\.us/g, '') : 'Unknown';
 
@@ -83,10 +79,7 @@ const AntiDelete = async (m, Matrix) => {
     return { name: 'Private Mission', isGroup: false };
   };
 
-  // ==========================
-  //    TOGGLE ANTIDELETE
-  // ==========================
-  if (m.body.toLowerCase() === 'antidelete on' || m.body.toLowerCase() === 'antidelete off') {
+  if (m.body.toLowerCase() === `${prefix}antidelete on` || m.body.toLowerCase() === `${prefix}antidelete off`) {
     const responses = {
       on: {
         text: `🗡️ *Demon-Slayer Anti-Delete Activated*\n\n` +
@@ -105,7 +98,7 @@ const AntiDelete = async (m, Matrix) => {
       }
     };
 
-    if (m.body.toLowerCase() === 'antidelete on') {
+    if (m.body.toLowerCase() === `${prefix}antidelete on`) {
       statusData.chats[chatId] = true;
       fs.writeFileSync(statusPath, JSON.stringify(statusData, null, 2));
       demonDelete.enabled = true;
@@ -122,9 +115,6 @@ const AntiDelete = async (m, Matrix) => {
     return;
   }
 
-  // ==========================
-  //    CACHE INCOMING MSGS
-  // ==========================
   Matrix.ev.on('messages.upsert', async ({ messages }) => {
     if (!demonDelete.enabled || !messages?.length) return;
 
@@ -183,9 +173,6 @@ const AntiDelete = async (m, Matrix) => {
     }
   });
 
-  // ==========================
-  //     RESTORE DELETED
-  // ==========================
   Matrix.ev.on('messages.update', async (updates) => {
     if (!demonDelete.enabled || !updates?.length) return;
 
