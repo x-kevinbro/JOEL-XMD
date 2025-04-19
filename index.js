@@ -169,11 +169,11 @@ async function start() {
                             forwardingScore: 999,
                             forwardedNewsletterMessageInfo: {
                                 newsletterJid: '120363317462952356@newsletter',
-                                newsletterName: "ᴊᴏᴇʟ xᴅ ʙᴏᴛ",
+                                newsletterName: "ᴊᴏᴇʟ xmᴅ ʙᴏᴛ ",
                                 serverMessageId: -1,
                             },
                             externalAdReply: {
-                                title: "ᴊᴏᴇʟ xᴅ ʙᴏᴛ",
+                                title: "ᴊᴏᴇʟ xmᴅ ʙᴏᴛ",
                                 body: "ᴘᴏᴡᴇʀᴇᴅ ʙʏ ʟᴏʀᴅ ᴊᴏᴇʟ",
                                 thumbnailUrl:
                                     'https://raw.githubusercontent.com/joeljamestech2/JOEL-XMD/refs/heads/main/mydata/media/joelXbot.jpg',
