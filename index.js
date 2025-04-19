@@ -1,8 +1,3 @@
-
-
-
-
-
 import dotenv from 'dotenv';
 dotenv.config();
 
@@ -13,6 +8,7 @@ import {
     DisconnectReason,
     useMultiFileAuthState,
 } from '@whiskeysockets/baileys';
+
 import { Handler, Callupdate, GroupUpdate } from './joelXtec/event/index.js';
 import express from 'express';
 import pino from 'pino';
@@ -24,6 +20,9 @@ import moment from 'moment-timezone';
 import axios from 'axios';
 import config from './config.cjs';
 import pkg from './lib/autoreact.cjs';
+
+import { fileURLToPath } from 'url';
+
 const { emojis, doReact } = pkg;
 
 const sessionName = "session";
@@ -42,7 +41,8 @@ logger.level = "trace";
 
 const msgRetryCounterCache = new NodeCache();
 
-const __filename = new URL(import.meta.url).pathname;
+// Fix for __dirname in ES module
+const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 const sessionDir = path.join(__dirname, 'session');
@@ -66,7 +66,7 @@ async function downloadSessionData() {
         console.log("🔒 Session Successfully Loaded !!");
         return true;
     } catch (error) {
-       // console.error('Failed to download session data:', error);
+        console.error('Failed to download session data');
         return false;
     }
 }
@@ -76,7 +76,7 @@ async function start() {
         const { state, saveCreds } = await useMultiFileAuthState(sessionDir);
         const { version, isLatest } = await fetchLatestBaileysVersion();
         console.log(`joel md using WA v${version.join('.')}, isLatest: ${isLatest}`);
-        
+
         const Matrix = makeWASocket({
             version,
             logger: pino({ level: 'silent' }),
@@ -110,7 +110,6 @@ async function start() {
         });
 
         Matrix.ev.on('creds.update', saveCreds);
-
         Matrix.ev.on("messages.upsert", async chatUpdate => await Handler(chatUpdate, Matrix, logger));
         Matrix.ev.on("call", async (json) => await Callupdate(json, Matrix));
         Matrix.ev.on("group-participants.update", async (messag) => await GroupUpdate(Matrix, messag));
@@ -121,11 +120,11 @@ async function start() {
             Matrix.public = false;
         }
 
+        // Auto reaction feature
         Matrix.ev.on('messages.upsert', async (chatUpdate) => {
             try {
                 const mek = chatUpdate.messages[0];
                 if (!mek.key.fromMe && config.AUTO_REACT) {
-                    console.log(mek);
                     if (mek.message) {
                         const randomEmoji = emojis[Math.floor(Math.random() * emojis.length)];
                         await doReact(randomEmoji, mek, Matrix);
@@ -135,6 +134,7 @@ async function start() {
                 console.error('Error during auto reaction:', err);
             }
         });
+
     } catch (error) {
         console.error('Critical Error:', error);
         process.exit(1);
@@ -160,13 +160,15 @@ async function init() {
 
 init();
 
+// Serve static files from 'mydata' folder
+app.use(express.static(path.join(__dirname, 'mydata')));
+
+// Serve index.html for root path
 app.get('/', (req, res) => {
-    res.send('am joel bot');
+    res.sendFile(path.join(__dirname, 'mydata', 'index.html'));
 });
 
+// Start express server
 app.listen(PORT, () => {
     console.log(`Server is running on port ${PORT}`);
 });
-
-
-//updated by lord joel 
