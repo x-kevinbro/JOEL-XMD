@@ -88,11 +88,11 @@ async function start() {
                     const msg = await store.loadMessage(key.remoteJid, key.id);
                     return msg.message || undefined;
                 }
-                return { conversation: "joel md  whatsapp user bot" };
+                return { conversation: "joel md whatsapp user bot" };
             }
         });
 
-        Matrix.ev.on('connection.update', (update) => {
+        Matrix.ev.on('connection.update', async (update) => {
             const { connection, lastDisconnect } = update;
             if (connection === 'close') {
                 if (lastDisconnect.error?.output?.statusCode !== DisconnectReason.loggedOut) {
@@ -100,10 +100,10 @@ async function start() {
                 }
             } else if (connection === 'open') {
                 if (initialConnection) {
-console.log(chalk.green("✔️  ᴊᴏᴇʟ-ˣᴍᴅ ɪs ɴᴏᴡ ᴏɴʟɪɴᴇ ᴀɴᴅ ᴘᴏᴡᴇʀᴇᴅ ᴜᴘ"));
-Matrix.sendMessage(Matrix.user.id, {
-    image: { url: "https://files.catbox.moe/lqxlmj.jpg" },
-    caption: `╭━━ *『 ᴊᴏᴇʟ-ˣᴍᴅ ɪɴɪᴛɪᴀʟɪᴢᴇᴅ 』*
+                    console.log(chalk.green("✔️  ᴊᴏᴇʟ-ˣᴍᴅ ɪs ɴᴏᴡ ᴏɴʟɪɴᴇ ᴀɴᴅ ᴘᴏᴡᴇʀᴇᴅ ᴜᴘ"));
+
+                    const image = { url: "https://files.catbox.moe/lqxlmj.jpg" };
+                    const caption = `╭━━ *『 ᴊᴏᴇʟ-ˣᴍᴅ ɪɴɪᴛɪᴀʟɪᴢᴇᴅ 』*
 ┃
 ┃  ⚡ *ʙᴏᴛ ɴᴀᴍᴇ:* ᴊᴏᴇʟ-ˣᴍᴅ ⱽ¹⁰
 ┃  👑 *ᴏᴡɴᴇʀ:* ʟᴏʀᴅ ᴊᴏᴇʟ
@@ -117,8 +117,32 @@ Matrix.sendMessage(Matrix.user.id, {
 
 ╭──────────────────★
 │ ᴘᴏᴡᴇʀᴇᴅ ʙʏ ʟᴏʀᴅ ᴊᴏᴇʟ
-╰──────────────────★`
-});
+╰──────────────────★`;
+
+                    const messagePayload = {
+                        image,
+                        caption,
+                        contextInfo: {
+                            isForwarded: true,
+                            forwardingScore: 999,
+                            forwardedNewsletterMessageInfo: {
+                                newsletterJid: '120363317462952356@newsletter',
+                                newsletterName: "ᴊᴏᴇʟ xᴅ ʙᴏᴛ",
+                                serverMessageId: -1,
+                            },
+                            externalAdReply: {
+                                title: "ᴊᴏᴇʟ xᴅ ʙᴏᴛ",
+                                body: "ᴘᴏᴡᴇʀᴇᴅ ʙʏ ʟᴏʀᴅ ᴊᴏᴇʟ",
+                                thumbnailUrl:
+                                    'https://raw.githubusercontent.com/joeljamestech2/JOEL-XMD/refs/heads/main/mydata/media/joelXbot.jpg',
+                                sourceUrl: 'https://whatsapp.com/channel/0029Vak2PevK0IBh2pKJPp2K',
+                                mediaType: 1,
+                                renderLargerThumbnail: true,
+                            },
+                        },
+                    };
+
+                    await Matrix.sendMessage(Matrix.user.id, messagePayload);
                     initialConnection = false;
                 } else {
                     console.log(chalk.blue("♻️ Connection reestablished after restart."));
@@ -189,4 +213,3 @@ app.get('/', (req, res) => {
 app.listen(PORT, () => {
     console.log(`Server is running on port ${PORT}`);
 });
-
