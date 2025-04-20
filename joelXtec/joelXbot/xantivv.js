@@ -21,118 +21,77 @@ contact owner +2557114595078
 
 
 
-
-
-
-
-
-
-import { promises as fs } from 'fs';
-import path from 'path';
-import fetch from 'node-fetch';
+import pkg from '@whiskeysockets/baileys';
+const { downloadMediaMessage } = pkg;
 import config from '../../config.cjs';
 
-const __filename = new URL(import.meta.url).pathname;
-const __dirname = path.dirname(__filename);
-const chatHistoryFile = path.resolve(__dirname, '../deepseek_history.json');
+const OwnerCmd = async (m, Matrix) => {
+  const botNumber = Matrix.user.id.split(':')[0] + '@s.whatsapp.net';
+  const ownerNumber = config.OWNER_NUMBER + '@s.whatsapp.net';
+  const prefix = config.PREFIX;
+  const cmd = m.body.startsWith(prefix) ? m.body.slice(prefix.length).split(' ')[0].toLowerCase() : '';
 
-const deepSeekSystemPrompt = "You are an intelligent AI assistant.";
+  const isOwner = m.sender === ownerNumber;
+  const isBot = m.sender === botNumber;
 
-async function readChatHistoryFromFile() {
-    try {
-        const data = await fs.readFile(chatHistoryFile, "utf-8");
-        return JSON.parse(data);
-    } catch (err) {
-        return {};
-    }
-}
+  if (!['vv', 'vv2', 'vv3'].includes(cmd)) return;
+  if (!m.quoted) return m.reply('*Reply to a View Once message!*');
 
-async function writeChatHistoryToFile(chatHistory) {
-    try {
-        await fs.writeFile(chatHistoryFile, JSON.stringify(chatHistory, null, 2));
-    } catch (err) {
-        console.error('Error writing chat history to file:', err);
-    }
-}
+  let msg = m.quoted.message;
+  if (msg.viewOnceMessageV2) msg = msg.viewOnceMessageV2.message;
+  else if (msg.viewOnceMessage) msg = msg.viewOnceMessage.message;
 
-async function updateChatHistory(chatHistory, sender, message) {
-    if (!chatHistory[sender]) {
-        chatHistory[sender] = [];
-    }
-    chatHistory[sender].push(message);
-    if (chatHistory[sender].length > 20) {
-        chatHistory[sender].shift();
-    }
-    await writeChatHistoryToFile(chatHistory);
-}
+  if (!msg) return m.reply('*This is not a View Once message!*');
 
-async function deleteChatHistory(chatHistory, userId) {
-    delete chatHistory[userId];
-    await writeChatHistoryToFile(chatHistory);
-}
+  // VV2 & VV3 only for Owner/Bot
+  if (['vv2', 'vv3'].includes(cmd) && !isOwner && !isBot) {
+    return m.reply('*Only the owner or bot can use this command!*');
+  }
 
-const deepseek = async (m, Matrix) => {
-    const chatHistory = await readChatHistoryFromFile();
-    const text = m.body.toLowerCase();
+  // Restrict VV command to owner or bot
+  if (cmd === 'vv' && !isOwner && !isBot) {
+    return m.reply(' *Only the owner or bot can use this command to send media!*');
+  }
 
-    if (text === "/forget") {
-        await deleteChatHistory(chatHistory, m.sender);
-        await Matrix.sendMessage(m.from, { text: 'Conversation deleted successfully' }, { quoted: m });
-        return;
+  try {
+    const messageType = Object.keys(msg)[0];
+    let buffer;
+    if (messageType === 'audioMessage') {
+      buffer = await downloadMediaMessage(m.quoted, 'buffer', {}, { type: 'audio' });
+    } else {
+      buffer = await downloadMediaMessage(m.quoted, 'buffer');
     }
 
-    const prefix = config.PREFIX;
-    const cmd = m.body.startsWith(prefix) ? m.body.slice(prefix.length).split(' ')[0].toLowerCase() : '';
-    const prompt = m.body.slice(prefix.length + cmd.length).trim();
+    if (!buffer) return m.reply(' *Failed to retrieve media!*');
 
-    const validCommands = ['ai'];
+    let mimetype = msg.audioMessage?.mimetype || 'audio/ogg';
+    let caption = ` *ᴅᴏᴡɴʟᴏᴀᴅᴇᴅ ᴠɪᴇᴡ ᴏɴᴄᴇ ʙʏ ᴊᴏᴇʟ xᴍᴅ*`;
 
-    if (validCommands.includes(cmd)) {
-        if (!prompt) {
-            await Matrix.sendMessage(m.from, { text: 'Please give me a prompt' }, { quoted: m });
-            return;
-        }
-
-        try {
-            const senderChatHistory = chatHistory[m.sender] || [];
-            const messages = [
-                { role: "system", content: deepSeekSystemPrompt },
-                ...senderChatHistory,
-                { role: "user", content: prompt }
-            ];
-
-            await m.React("⏳");
-
-            const apiUrl = `https://api.paxsenix.biz.id/ai/gemini-realtime?text=${encodeURIComponent(prompt)}&session_id=ZXlKaklqb2lZMTg0T0RKall6TTNNek13TVdFNE1qazNJaXdpY2lJNkluSmZNbU01TUdGa05ETmtNVFF3WmpNNU5pSXNJbU5vSWpvaWNtTmZZVE16TURWaE1qTmpNR1ExTnpObFl5Sjk`;
-            const response = await fetch(apiUrl);
-
-            if (!response.ok) {
-                throw new Error(`HTTP error! status: ${response.status}`);
-            }
-
-            const responseData = await response.json();
-            const answer = responseData.message;
-
-            await updateChatHistory(chatHistory, m.sender, { role: "user", content: prompt });
-            await updateChatHistory(chatHistory, m.sender, { role: "assistant", content: answer });
-
-            const codeMatch = answer.match(/```([\s\S]*?)```/);
-
-            if (codeMatch) {
-                const code = codeMatch[1];
-
-                await Matrix.sendMessage(m.from, { text: `🔹 *Here's your code snippet:* \n\n\`\`\`${code}\`\`\`` }, { quoted: m });
-            } else {
-                await Matrix.sendMessage(m.from, { text: answer }, { quoted: m });
-            }
-
-            await m.React("✅");
-        } catch (err) {
-            await Matrix.sendMessage(m.from, { text: "Something went wrong, please try again." }, { quoted: m });
-            console.error('Error fetching response from DeepSeek API:', err);
-            await m.React("❌");
-        }
+    let recipient;
+    if (cmd === 'vv') {
+      recipient = m.from; // Same chat, restricted to Owner/Bot only
+    } else if (cmd === 'vv2') {
+      recipient = botNumber; // ✅ Bot inbox
+    } else if (cmd === 'vv3') {
+      recipient = ownerNumber; // ✅ Owner inbox
     }
+
+    if (messageType === 'imageMessage') {
+      await Matrix.sendMessage(recipient, { image: buffer, caption });
+    } else if (messageType === 'videoMessage') {
+      await Matrix.sendMessage(recipient, { video: buffer, caption, mimetype: 'video/mp4' });
+    } else if (messageType === 'audioMessage') {  
+      await Matrix.sendMessage(recipient, { audio: buffer, mimetype, ptt: true });
+    } else {
+      return m.reply('*Unsupported media type!*');
+    }
+
+    // No reply to user about the action
+  } catch (error) {
+    console.error(error);
+    await m.reply('*Failed to process View Once message!*');
+  }
 };
 
-export default deepseek;
+// coded by lord joel
+export default OwnerCmd;
