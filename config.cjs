@@ -45,12 +45,7 @@ const config = {
   MODE: process.env.MODE || "public",
   DELETED_MESSAGES_CHAT_ID: process.env.DELETED_MESSAGES_CHAT_ID || "12345678901",
   OWNER_NAME: process.env.OWNER_NAME || "ʟᴏʀᴅ ᴊᴏᴇʟ",
-  OWNER_NUMBER: process.env.OWNER_NUMBER ? process.env.OWNER_NUMBER.split(',') : [
-    "255714595078",
-    "255781144539",
-    "2557570963",
-    "255768886545"
-  ],
+  OWNER_NUMBER: process.env.OWNER_NUMBER ? process.env.OWNER_NUMBER.split(',') : [255781144539,255714595078],
   SUDO_NUMBER: process.env.SUDO_NUMBER ? process.env.SUDO_NUMBER.split(',') : ["255781144539"],
 
   // API keys
