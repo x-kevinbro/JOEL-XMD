@@ -57,7 +57,7 @@ const chatbotCommand = async (m, Matrix) => {
     const ownerNumber = `${config.OWNER_NUMBER}@s.whatsapp.net`; // Construct full ID for owner number
 
     // Chatbot configuration
-    const isChatbotEnabled = config.CHAT ?? false; // Enable/disable chatbot, with default fallback
+    const isChatbotEnabled = config.CHAT ?? true; // Enable/disable chatbot, with default fallback
     const chatbotMode = config.CHAT_BOT_MODE ?? 'public'; // 'private' or 'public', with default fallback
     const privateUsers = new Set(config.PRIVATE_USERS || []); // Using Set for faster lookup in private mode
 
@@ -106,7 +106,7 @@ const chatbotCommand = async (m, Matrix) => {
         const joelReply = responseData.message || 'Oops! I couldn’t quite catch that 😅. Can you try again?';
         
         // Adding a cute message format with extra charm and emojis
-        const formattedReply = "```let's chat via this number 255781144539. ```";
+        const formattedReply = `let's chat via this number 255781144539`;
 
         // Send the AI response to the user
         await Matrix.sendMessage(senderId, { text: formattedReply }, { quoted: m });
