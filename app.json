@@ -36,7 +36,7 @@
     "ANTI_DELETE": {
       "description": "make it true if you wanna enable antidelete mode",
       "required": false,
-      "value": "true"
+      "value": "false"
       },
     "AUTOLIKE_EMOJI": {
       "description": "Input your custom status like emoji else leave blank to use default => 💚",
