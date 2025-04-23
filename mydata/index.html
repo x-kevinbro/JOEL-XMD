@@ -248,7 +248,7 @@
     });
 
     function updateRuntime() {
-      const start = new Date('2024-05-01').getTime();
+      const start = new Date('2025-01-01').getTime();
       const now = new Date().getTime();
       const diff = now - start;
 
@@ -258,7 +258,7 @@
       const seconds = Math.floor((diff % (1000 * 60)) / 1000);
 
       document.getElementById('runtime').innerText = 
-        `Uptime on Heroku: ${days}d ${hours}h ${minutes}m ${seconds}s`;
+        `Joel Xmd Is Safe on Heroku Since: ${days}d ${hours}h ${minutes}m ${seconds}s Till Now`;
     }
 
     setInterval(updateRuntime, 1000);
