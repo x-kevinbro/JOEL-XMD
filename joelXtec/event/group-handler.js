@@ -1,11 +1,6 @@
 
 
 
-
-
-
-
-
 import moment from 'moment-timezone';
 import config from '../../config.cjs';
 export default async function GroupParticipants(sock, { id, participants, action }) {
@@ -79,27 +74,3 @@ export default async function GroupParticipants(sock, { id, participants, action
       throw e
    }
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
