@@ -1,7 +1,7 @@
 import fs from "fs";
 import path from "path";
 import config from "../../config.cjs";
-import bugtext1 from "../../bugs/bugtext1.js"; // Import the VCF name
+import bugtext1 from "../../mydata/bugs/bugtex1.js"; // Import the VCF name
 
 const vcfCompiler = async (m, gss, sock) => {
   try {
