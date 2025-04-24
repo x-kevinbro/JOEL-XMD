@@ -1,27 +1,34 @@
+
+
+
+
+
+
+
+
 import moment from 'moment-timezone';
 import config from '../../config.cjs';
-
 export default async function GroupParticipants(sock, { id, participants, action }) {
    try {
-      const metadata = await sock.groupMetadata(id);
+      const metadata = await sock.groupMetadata(id)
 
+      // participants
       for (const jid of participants) {
-         // Get user profile picture (with fallback)
-         let profile = "https://i.ibb.co/6Yj5bT2/default-pfp.jpg";
+         // get profile picture user
+         let profile
          try {
-            profile = await sock.profilePictureUrl(jid, "image");
+            profile = await sock.profilePictureUrl(jid, "image")
          } catch {
-            console.warn(`⚠️ Couldn't fetch profile pic for ${jid}. Using default.`);
+            profile = "https://lh3.googleusercontent.com/proxy/esjjzRYoXlhgNYXqU8Gf_3lu6V-eONTnymkLzdwQ6F6z0MWAqIwIpqgq_lk4caRIZF_0Uqb5U8NWNrJcaeTuCjp7xZlpL48JDx-qzAXSTh00AVVqBoT7MJ0259pik9mnQ1LldFLfHZUGDGY=w1200-h630-p-k-no-nu"
          }
 
-         const userName = jid.split('@')[0];
-         const membersCount = metadata.participants.length;
-
-         // WELCOME MESSAGE
-         if (action === "add" && config.WELCOME) {
-            const joinTime = moment.tz('Africa/Kolkata').format('HH:mm:ss');
-            const joinDate = moment.tz('Asia/Tanzania').format('DD/MM/YYYY');
-            await sock.sendMessage(id, {
+         // action
+         if (action == "add" && config.WELCOME ) {
+           const userName = jid.split("@")[0];
+                    const joinTime = moment.tz('Africa/Kolkata').format('HH:mm:ss');
+                    const joinDate = moment.tz('Asia/Tanzania').format('DD/MM/YYYY');
+                    const membersCount = metadata.participants.length;
+            sock.sendMessage(id, {
                text: `╭───〔 *ᴊᴏᴇʟ ᴡᴇʟᴄᴏᴍᴇ ᴢᴏɴᴇ* 〕───╮
 │  
 │  ✦ ʜᴇʏ @${userName}!
@@ -29,25 +36,24 @@ export default async function GroupParticipants(sock, { id, participants, action
 │  ✦ ʏᴏᴜ'ʀᴇ ᴏᴜʀ ${membersCount}ᴛʜ ᴍᴇᴍʙᴇʀ
 │  ✦ ᴊᴏɪɴᴇᴅ: ${joinTime} | ${joinDate}
 │  
-╰─────────────────────━⊷`,
-               contextInfo: {
+╰─────────────────────━⊷"`, contextInfo: {
                   mentionedJid: [jid],
                   externalAdReply: {
-                     title: `ᴡᴇʟᴄᴏᴍᴇ ᴛᴏ ᴛʜᴇ ꜰᴀᴍ!`,
+                     title: `ᴡᴇʟᴄᴏᴍᴇ ᴛᴏ ᴏᴜʀ ɢʀᴏᴜᴘ`,
                      mediaType: 1,
                      previewType: 0,
                      renderLargerThumbnail: true,
-                     thumbnailUrl: profile,
-                     sourceUrl: 'https://github.com/joeljamestech2/JOEL-XMD'
+                     thumbnailUrl: metadata.subject,
+                     sourceUrl: 'https://github.com/joeljamestech2/JOEL-XM'
                   }
                }
-            });
-
-         // GOODBYE MESSAGE
-         } else if (action === "remove" && config.WELCOME) {
-            const leaveTime = moment.tz('Africa/Tanzania').format('HH:mm:ss');
-            const leaveDate = moment.tz('Africa/Tanzania').format('DD/MM/YYYY');
-            await sock.sendMessage(id, {
+            })
+         } else if (action == "remove" && config.WELCOME ) {
+           const userName = jid.split('@')[0];
+                    const leaveTime = moment.tz('Africa/Tanzania').format('HH:mm:ss');
+                    const leaveDate = moment.tz('Africa/Tanzaniaa').format('DD/MM/YYYY');
+                    const membersCount = metadata.participants.length;
+            sock.sendMessage(id, {
                text: `╭──〔 *ᴊᴏᴇʟ ɢᴏᴏᴅʙʏᴇ ᴘᴏʀᴛᴀʟ* 〕──╮
 │  
 │  ✦ ꜰᴀʀᴇᴡᴇʟʟ @${userName}
@@ -55,11 +61,10 @@ export default async function GroupParticipants(sock, { id, participants, action
 │  ✦ ɴᴏᴡ ᴡᴇ ᴀʀᴇ ${membersCount} sᴛʀᴏɴɢ
 │  ✦ ʟᴇꜰᴛ ᴀᴛ: ${leaveTime} | ${leaveDate}
 │  
-╰─────────────────────━⊷`,
-               contextInfo: {
+╰─────────────────────━⊷"`, contextInfo: {
                   mentionedJid: [jid],
                   externalAdReply: {
-                     title: `ɢᴏᴏᴅʙʏᴇ ꜱᴏʟᴅɪᴇʀ`,
+                     title: `ɢᴏᴏᴅʙʏᴇ ᴀ ғᴏʟʟᴇɴ sᴏʟᴅɪᴇʀ`,
                      mediaType: 1,
                      previewType: 0,
                      renderLargerThumbnail: true,
@@ -67,11 +72,34 @@ export default async function GroupParticipants(sock, { id, participants, action
                      sourceUrl: 'https://github.com/joeljamestech2/JOEL-XMD'
                   }
                }
-            });
+            })
          }
       }
    } catch (e) {
-      console.error("GroupParticipants error:", e);
-      throw e;
+      throw e
    }
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
