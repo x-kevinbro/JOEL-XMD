@@ -1,60 +1,77 @@
 import moment from 'moment-timezone';
 import config from '../../config.cjs';
+
 export default async function GroupParticipants(sock, { id, participants, action }) {
    try {
-      const metadata = await sock.groupMetadata(id)
+      const metadata = await sock.groupMetadata(id);
 
-      // participants
       for (const jid of participants) {
-         // get profile picture user
-         let profile
+         // Get user profile picture (with fallback)
+         let profile = "https://i.ibb.co/6Yj5bT2/default-pfp.jpg";
          try {
-            profile = await sock.profilePictureUrl(jid, "image")
+            profile = await sock.profilePictureUrl(jid, "image");
          } catch {
-            profile = "https://lh3.googleusercontent.com/proxy/esjjzRYoXlhgNYXqU8Gf_3lu6V-eONTnymkLzdwQ6F6z0MWAqIwIpqgq_lk4caRIZF_0Uqb5U8NWNrJcaeTuCjp7xZlpL48JDx-qzAXSTh00AVVqBoT7MJ0259pik9mnQ1LldFLfHZUGDGY=w1200-h630-p-k-no-nu"
+            console.warn(`⚠️ Couldn't fetch profile pic for ${jid}. Using default.`);
          }
 
-         // action
-         if (action == "add" && config.WELCOME ) {
-           const userName = jid.split("@")[0];
-                    const joinTime = moment.tz('Asia/Kolkata').format('HH:mm:ss');
-                    const joinDate = moment.tz('Asia/Kolkata').format('DD/MM/YYYY');
-                    const membersCount = metadata.participants.length;
-            sock.sendMessage(id, {
-               text: `> Hello @${userName}! Welcome to *${metadata.subject}*.\n> You are the ${membersCount}th member.\n> Joined at: ${joinTime} on ${joinDate}
-"`, contextInfo: {
+         const userName = jid.split('@')[0];
+         const membersCount = metadata.participants.length;
+
+         // WELCOME MESSAGE
+         if (action === "add" && config.WELCOME) {
+            const joinTime = moment.tz('Africa/Kolkata').format('HH:mm:ss');
+            const joinDate = moment.tz('Asia/Tanzania').format('DD/MM/YYYY');
+            await sock.sendMessage(id, {
+               text: `╭───〔 *ᴊᴏᴇʟ ᴡᴇʟᴄᴏᴍᴇ ᴢᴏɴᴇ* 〕───╮
+│  
+│  ✦ ʜᴇʏ @${userName}!
+│  ✦ ᴡᴇʟᴄᴏᴍᴇ ᴛᴏ *${metadata.subject}*
+│  ✦ ʏᴏᴜ'ʀᴇ ᴏᴜʀ ${membersCount}ᴛʜ ᴍᴇᴍʙᴇʀ
+│  ✦ ᴊᴏɪɴᴇᴅ: ${joinTime} | ${joinDate}
+│  
+╰─────────────────────━⊷`,
+               contextInfo: {
                   mentionedJid: [jid],
                   externalAdReply: {
-                     title: `Welcome`,
-                     mediaType: 1,
-                     previewType: 0,
-                     renderLargerThumbnail: true,
-                     thumbnailUrl: metadata.subject,
-                     sourceUrl: 'https://sid-bhai.vercel.app'
-                  }
-               }
-            })
-         } else if (action == "remove" && config.WELCOME ) {
-           const userName = jid.split('@')[0];
-                    const leaveTime = moment.tz('Asia/Kolkata').format('HH:mm:ss');
-                    const leaveDate = moment.tz('Asia/Kolkata').format('DD/MM/YYYY');
-                    const membersCount = metadata.participants.length;
-            sock.sendMessage(id, {
-               text: `> Goodbye @${userName} from ${metadata.subject}.\n> We are now ${membersCount} in the group.\n> Left at: ${leaveTime} on ${leaveDate}"`, contextInfo: {
-                  mentionedJid: [jid],
-                  externalAdReply: {
-                     title: `Leave`,
+                     title: `ᴡᴇʟᴄᴏᴍᴇ ᴛᴏ ᴛʜᴇ ꜰᴀᴍ!`,
                      mediaType: 1,
                      previewType: 0,
                      renderLargerThumbnail: true,
                      thumbnailUrl: profile,
-                     sourceUrl: 'https://sid-bhai.vercel.app'
+                     sourceUrl: 'https://github.com/joeljamestech2/JOEL-XMD'
                   }
                }
-            })
+            });
+
+         // GOODBYE MESSAGE
+         } else if (action === "remove" && config.WELCOME) {
+            const leaveTime = moment.tz('Africa/Tanzania').format('HH:mm:ss');
+            const leaveDate = moment.tz('Africa/Tanzania').format('DD/MM/YYYY');
+            await sock.sendMessage(id, {
+               text: `╭──〔 *ᴊᴏᴇʟ ɢᴏᴏᴅʙʏᴇ ᴘᴏʀᴛᴀʟ* 〕──╮
+│  
+│  ✦ ꜰᴀʀᴇᴡᴇʟʟ @${userName}
+│  ✦ ʏᴏᴜ ʟᴇғᴛ *${metadata.subject}*
+│  ✦ ɴᴏᴡ ᴡᴇ ᴀʀᴇ ${membersCount} sᴛʀᴏɴɢ
+│  ✦ ʟᴇꜰᴛ ᴀᴛ: ${leaveTime} | ${leaveDate}
+│  
+╰─────────────────────━⊷`,
+               contextInfo: {
+                  mentionedJid: [jid],
+                  externalAdReply: {
+                     title: `ɢᴏᴏᴅʙʏᴇ ꜱᴏʟᴅɪᴇʀ`,
+                     mediaType: 1,
+                     previewType: 0,
+                     renderLargerThumbnail: true,
+                     thumbnailUrl: profile,
+                     sourceUrl: 'https://github.com/joeljamestech2/JOEL-XMD'
+                  }
+               }
+            });
          }
       }
    } catch (e) {
-      throw e
+      console.error("GroupParticipants error:", e);
+      throw e;
    }
 }
