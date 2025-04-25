@@ -1,7 +1,6 @@
 import { promises as fs } from 'fs';
 import path from 'path';
 import fetch from 'node-fetch';
-import config from '../../config.cjs';
 
 const __filename = new URL(import.meta.url).pathname;
 const __dirname = path.dirname(__filename);
@@ -71,20 +70,16 @@ async function deleteChatHistory(history, sender) {
 const deepseek = async (msg, conn) => {
   const gptStatus = await readGptStatus();
   const history = await readChatHistory();
-  const text = msg.body.trim();
-  const prefix = config.PREFIX;
-  const command = text.startsWith(prefix) ? text.slice(prefix.length).split(' ')[0].toLowerCase() : '';
+  const text = msg.body.trim().toLowerCase();
 
-  // Identity
-  if (text.toLowerCase() === "who are you" || text.toLowerCase() === "what are you") {
+  if (text === "who are you" || text === "what are you") {
     await conn.sendMessage(msg.from, {
       text: "I'm CLOUD AI, developed by Bruce Bera and the Bera Tech team."
     }, { quoted: msg });
     return;
   }
 
-  // Forget command
-  if (command === "forget") {
+  if (text === "/forget") {
     await deleteChatHistory(history, msg.sender);
     await conn.sendMessage(msg.from, {
       text: "🗑️ Conversation deleted successfully."
@@ -92,15 +87,14 @@ const deepseek = async (msg, conn) => {
     return;
   }
 
-  // Owner-only GPT toggle
-  if (text.toLowerCase() === "deepseek on" || text.toLowerCase() === "deepseek off") {
+  if (text === "deepseek on" || text === "deepseek off") {
     if (!(await isOwner(msg, conn))) {
       await conn.sendMessage(msg.from, {
         text: "❌ Permission Denied! Only the bot owner can toggle GPT mode."
       }, { quoted: msg });
       return;
     }
-    const enable = text.toLowerCase() === "deepseek on";
+    const enable = text === "deepseek on";
     await writeGptStatus(enable);
     await conn.sendMessage(msg.from, {
       text: "✅ GPT Mode has been " + (enable ? "activated" : "deactivated") + '.'
@@ -108,11 +102,9 @@ const deepseek = async (msg, conn) => {
     return;
   }
 
-  // GPT off check
   if (!gptStatus.enabled) return;
 
-  // Empty GPT call
-  if (command === "gpt") {
+  if (text === "gpt") {
     await conn.sendMessage(msg.from, {
       text: "Please provide a prompt."
     }, { quoted: msg });
@@ -177,7 +169,7 @@ const deepseek = async (msg, conn) => {
 
     await msg.React('✅');
   } catch (err) {
-    console.error("Error fetching response:", err.stack || err);
+    console.error("Error fetching response:", err);
     await conn.sendMessage(msg.from, {
       text: "Something went wrong, please try again."
     }, { quoted: msg });
