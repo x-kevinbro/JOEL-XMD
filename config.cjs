@@ -29,6 +29,7 @@ const config = {
   STATUS_READ_MSG: process.env.STATUS_READ_MSG || 'Status Viewed by joel-Md',
 
   // Anti features
+  ANTILINK: process.env.ANTILINK !== undefined ? process.env.ANTILINK === 'true' : false,
   ANTI_LEFT: process.env.ANTI_LEFT !== undefined ? process.env.ANTI_LEFT === 'true' : true,
   ANTI_DELETE: process.env.ANTI_DELETE !== undefined ? process.env.ANTI_DELETE === 'true' : true,
   AUTO_BLOCK: process.env.AUTO_BLOCK !== undefined ? process.env.AUTO_BLOCK === 'true' : true,
