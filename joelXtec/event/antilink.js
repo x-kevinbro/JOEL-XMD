@@ -14,12 +14,6 @@ export const handleAntilink = async (m, sock, logger, isBotAdmins, isAdmins, isC
         antilinkSettings[m.from] = { antilink: false, antilink2: false, warnings: {} };
     }
 
-    // Automatically enable antilink delete if config.ANTILINK is true
-    if (config.ANTILINK && !antilinkSettings[m.from].antilink) {
-        antilinkSettings[m.from].antilink = true;
-        await sock.sendMessage(m.from, { text: '✅ *Antilink (Delete Only) enabled automatically as per the configuration!*' }, { quoted: m });
-    }
-
     if (cmd === 'antilink' || cmd === 'antilink2') {
         if (!m.isGroup) return await sock.sendMessage(m.from, { text: 'This command can only be used in groups.' }, { quoted: m });
         if (!isBotAdmins) return await sock.sendMessage(m.from, { text: 'The bot needs to be an admin to manage the antilink feature.' }, { quoted: m });
