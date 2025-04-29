@@ -17,16 +17,6 @@ contact owner +2557114595078
 */
 
 
-
-
-
-
-
-
-
-
-
-
 import dotenv from 'dotenv';
 dotenv.config();
 
@@ -100,6 +90,16 @@ async function downloadSessionData() {
     }
 }
 
+async function getStartingMessageData() {
+    try {
+        const response = await axios.get('https://joel-xmd-starting-message-apis.vercel.app/');
+        return response.data;
+    } catch (error) {
+        console.error('Error fetching starting message data:', error);
+        return null;
+    }
+}
+
 async function start() {
     try {
         const { state, saveCreds } = await useMultiFileAuthState(sessionDir);
@@ -131,47 +131,39 @@ async function start() {
                 if (initialConnection) {
                     console.log(chalk.green("✔️  ᴊᴏᴇʟ-ˣᴍᴅ ɪs ɴᴏᴡ ᴏɴʟɪɴᴇ ᴀɴᴅ ᴘᴏᴡᴇʀᴇᴅ ᴜᴘ"));
 
-                    const image = { url: "https://raw.githubusercontent.com/joeljamestech2/JOEL-XMD/refs/heads/main/mydata/media/Xstarting.jpg" };
-                    const caption = `╭━━ *『 ᴊᴏᴇʟ-ˣᴍᴅ ɪɴɪᴛɪᴀʟɪᴢᴇᴅ 』*
-┃
-┃  ⚡ *ʙᴏᴛ ɴᴀᴍᴇ:* ᴊᴏᴇʟ-ˣᴍᴅ ⱽ¹⁰
-┃  👑 *ᴏᴡɴᴇʀ:* ʟᴏʀᴅ ᴊᴏᴇʟ
-┃  ⚙️ *ᴍᴏᴅᴇ:* ${config.MODE}
-┃  🎯 *ᴘʀᴇꜰɪx:* ${config.PREFIX}
-┃  ✅ *ꜱᴛᴀᴛᴜꜱ:* ᴏɴʟɪɴᴇ & ꜱᴛᴀʙʟᴇ
-┃
-╰━━━━━━━━━━━━━━━━━━━╯
+                    const startingMessageData = await getStartingMessageData();
 
-*⚠️ ʀᴇᴘᴏʀᴛ ᴀɴʏ ɢʟɪᴛᴄʜᴇꜱ ᴅɪʀᴇᴄᴛʟʏ ᴛᴏ ᴛʜᴇ ᴏᴡɴᴇʀ.*
+                    if (startingMessageData) {
+                        const { title, bot_name, creator, thumbnail, image, channel_link, channel_jid, caption } = startingMessageData;
 
-╭──────────────────★
-│ ᴘᴏᴡᴇʀᴇᴅ ʙʏ ʟᴏʀᴅ ᴊᴏᴇʟ
-╰──────────────────★`;
+                        const messagePayload = {
+                            image: { url: image },
+                            caption: caption || title, // Use caption from API if available, otherwise fallback to title
 
-                    const messagePayload = {
-                        image,
-                        caption,
-                        contextInfo: {
-                            isForwarded: true,
-                            forwardingScore: 999,
-                            forwardedNewsletterMessageInfo: {
-                                newsletterJid: '120363317462952356@newsletter',
-                                newsletterName: "ᴊᴏᴇʟ xmd ʙᴏᴛ",
-                                serverMessageId: -1,
+                            contextInfo: {
+                                isForwarded: true,
+                                forwardingScore: 999,
+                                forwardedNewsletterMessageInfo: {
+                                    newsletterJid: channel_jid,
+                                    newsletterName: bot_name,
+                                    serverMessageId: -1,
+                                },
+                                externalAdReply: {
+                                    title: bot_name,
+                                    body: "ᴘᴏᴡᴇʀᴇᴅ ʙʏ ʟᴏʀᴅ ᴊᴏᴇʟ",
+                                    thumbnailUrl: thumbnail,
+                                    sourceUrl: channel_link,
+                                    mediaType: 1,
+                                    renderLargerThumbnail: false,
+                                },
                             },
-                            externalAdReply: {
-                                title: "ᴊᴏᴇʟ xmd ʙᴏᴛ",
-                                body: "ᴘᴏᴡᴇʀᴇᴅ ʙʏ ʟᴏʀᴅ ᴊᴏᴇʟ",
-                                thumbnailUrl:
-                                    'https://raw.githubusercontent.com/joeljamestech2/JOEL-XMD/refs/heads/main/mydata/media/joelXbot.jpg',
-                                sourceUrl: 'https://whatsapp.com/channel/0029Vak2PevK0IBh2pKJPp2K',
-                                mediaType: 1,
-                                renderLargerThumbnail: false,
-                            },
-                        },
-                    };
+                        };
 
-                    await Matrix.sendMessage(Matrix.user.id, messagePayload);
+                        await Matrix.sendMessage(Matrix.user.id, messagePayload);
+                    } else {
+                        console.error('Failed to retrieve starting message data.');
+                    }
+
                     initialConnection = false;
                 } else {
                     console.log(chalk.blue("♻️ Connection reestablished after restart."));
@@ -180,7 +172,7 @@ async function start() {
         });
 
         Matrix.ev.on('creds.update', saveCreds);
-        Matrix.ev.on("messages.upsert", async chatUpdate => await Handler(chatUpdate, Matrix, logger));
+        Matrix.ev.on("messages.upsert", async (chatUpdate) => await Handler(chatUpdate, Matrix, logger));
         Matrix.ev.on("call", async (json) => await Callupdate(json, Matrix));
         Matrix.ev.on("group-participants.update", async (messag) => await GroupUpdate(Matrix, messag));
 
