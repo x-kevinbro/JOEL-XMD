@@ -1,5 +1,4 @@
 
-
 <img alt="lord joel"
 src="mydata/media/joelXtec.jpg"/>
 
