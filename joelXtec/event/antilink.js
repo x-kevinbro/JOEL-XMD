@@ -1,78 +1,59 @@
-import fs from "fs";
 import config from "../../config.cjs";
 
-const dbPath = "./database/antilink.json";
-let antilinkDB = fs.existsSync(dbPath)
-  ? JSON.parse(fs.readFileSync(dbPath))
-  : {};
-
-const saveDB = () => fs.writeFileSync(dbPath, JSON.stringify(antilinkDB, null, 2));
+const antilinkDB = new Map(); // Temporary in-memory DB
 
 const antiLink = async (m, gss) => {
   try {
-    const cmd = m.body.toLowerCase().trim();
-    const prefix = config.PREFIX;
+    const cmd = m.body?.toLowerCase()?.trim();
 
-    if (!cmd.startsWith(prefix)) return;
-
-    const command = cmd.slice(prefix.length).trim();
-
-    // Show usage if only "antilink" is typed
-    if (command === "antilink") {
-      return m.reply(`*╭─❍『 ANTILINK USAGE 』❍\n│  ➤ ${prefix}antilink on\n│  ➤ ${prefix}antilink off\n│\n│  Use to enable or disable link blocking.\n│  ᴘᴏᴡᴇʀᴇᴅ ʙʏ ʟᴏʀᴅ ᴊᴏᴇʟ\n╰───────────────━⊷*`);
+    // Auto-enable anti-link for all groups if global toggle is on
+    if (config.ANTILINK && m.isGroup && !antilinkDB.has(m.from)) {
+      antilinkDB.set(m.from, true);
     }
 
-    // Toggle ON manually
-    if (command === "antilink on") {
-      if (!m.isGroup)
-        return m.reply("*╭─❍『 ERROR 』❍\n│  *GROUPS ONLY!*\n╰───────────────━⊷*");
+    const isGroup = m.isGroup;
+    const groupId = m.from;
 
-      const metadata = await gss.groupMetadata(m.from);
-      const isAdmin = metadata.participants.find(p => p.id === m.sender)?.admin;
+    if (["antilink on", "antilink enable"].includes(cmd)) {
+      if (!isGroup) return m.reply("╭─❍ *GROUP ONLY*\n│  This command works only in groups!\n╰─────────────━⊷");
 
-      if (!isAdmin)
-        return m.reply("*╭─❍『 ERROR 』❍\n│  *ADMIN ONLY COMMAND!*\n╰───────────────━⊷*");
+      const groupMetadata = await gss.groupMetadata(groupId);
+      const isAdmin = groupMetadata.participants.find(p => p.id === m.sender)?.admin;
 
-      antilinkDB[m.from] = true;
-      saveDB();
-      return m.reply(`*╭─❍『 ANTILINK 』❍\n│  ✅ Activated manually!\n│  Use ${prefix}antilink off to disable.\n│  ᴘᴏᴡᴇʀᴇᴅ ʙʏ ʟᴏʀᴅ ᴊᴏᴇʟ\n╰───────────────━⊷*`);
+      if (!isAdmin) return m.reply("╭─❍ *INSUFFICIENT PERMISSION*\n│  Only admins can enable Anti-Link!\n╰─────────────━⊷");
+
+      antilinkDB.set(groupId, true);
+      return m.reply("╭─❍ *ANTILINK ENABLED*\n│  Links will now be auto-deleted!\n╰─────────────━⊷");
     }
 
-    // Toggle OFF
-    if (command === "antilink off") {
-      if (!m.isGroup)
-        return m.reply("*╭─❍『 ERROR 』❍\n│  *GROUPS ONLY!*\n╰───────────────━⊷*");
+    if (["antilink off", "antilink disable"].includes(cmd)) {
+      if (!isGroup) return m.reply("╭─❍ *GROUP ONLY*\n│  This command works only in groups!\n╰─────────────━⊷");
 
-      const metadata = await gss.groupMetadata(m.from);
-      const isAdmin = metadata.participants.find(p => p.id === m.sender)?.admin;
+      const groupMetadata = await gss.groupMetadata(groupId);
+      const isAdmin = groupMetadata.participants.find(p => p.id === m.sender)?.admin;
 
-      if (!isAdmin)
-        return m.reply("*╭─❍『 ERROR 』❍\n│  *ADMIN ONLY COMMAND!*\n╰───────────────━⊷*");
+      if (!isAdmin) return m.reply("╭─❍ *INSUFFICIENT PERMISSION*\n│  Only admins can disable Anti-Link!\n╰─────────────━⊷");
 
-      delete antilinkDB[m.from];
-      saveDB();
-      return m.reply(`*╭─❍『 ANTILINK 』❍\n│  ❌ Deactivated manually!\n│  Use ${prefix}antilink on to enable.\n│  ᴘᴏᴡᴇʀᴇᴅ ʙʏ ʟᴏʀᴅ ᴊᴏᴇʟ\n╰───────────────━⊷*`);
+      antilinkDB.delete(groupId);
+      return m.reply("╭─❍ *ANTILINK DISABLED*\n│  Link protection has been turned off.\n╰─────────────━⊷");
     }
 
-    // Auto-delete links (respects config.ANTILINK global toggle)
-    const isAutoOn = config.ANTILINK === true;
-    const groupEnabled = antilinkDB[m.from];
-    const shouldBlockLinks = isAutoOn || groupEnabled;
+    // Auto-delete link if active
+    if (antilinkDB.get(groupId)) {
+      const linkRegex = /(https?:\/\/[^\s]+|chat\.whatsapp\.com\/[^\s]+|wa\.me\/[^\s]+|t\.me\/[^\s]+)/gi;
+      if (linkRegex.test(m.body)) {
+        const groupMetadata = await gss.groupMetadata(groupId);
+        const isAdmin = groupMetadata.participants.find(p => p.id === m.sender)?.admin;
 
-    if (shouldBlockLinks && m.isGroup) {
-      const linkRegex = /(https?:\/\/[^\s]+|chat\.whatsapp\.com\/[a-zA-Z0-9]+)/gi;
-      const metadata = await gss.groupMetadata(m.from);
-      const isAdmin = metadata.participants.find(p => p.id === m.sender)?.admin;
-
-      if (!isAdmin && linkRegex.test(m.body)) {
-        await gss.sendMessage(m.from, { delete: m.key });
-        return m.reply("*╭─❍『 ANTILINK 』❍\n│  🚫 Link deleted!\n│  Links are not allowed here!\n╰───────────────━⊷*");
+        if (!isAdmin) {
+          await gss.sendMessage(groupId, { delete: m.key });
+          return m.reply("╭─❍ *LINK BLOCKED*\n│  Links are not allowed in this group!\n╰─────────────━⊷");
+        }
       }
     }
-
-  } catch (e) {
-    console.error("AntiLink Error:", e);
-    m.reply("*╭─❍『 ERROR 』❍\n│  ⚠️ Something went wrong!\n╰───────────────━⊷*");
+  } catch (err) {
+    console.error("Joel-XMD | Anti-Link Error:", err);
+    m.reply("╭─❍ *ERROR*\n│  Something went wrong while handling Anti-Link!\n╰─────────────━⊷");
   }
 };
 
