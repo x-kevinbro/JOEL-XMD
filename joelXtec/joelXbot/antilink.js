@@ -1,69 +1,79 @@
-import config from '../../config.js'; // adjust path as needed
+import fs from "fs";
+import config from "../../config.cjs";
 
-const antilinkSettings = {}; // Store per-group antilink status
+const dbPath = "./database/antilink.json";
+let antilinkDB = fs.existsSync(dbPath)
+  ? JSON.parse(fs.readFileSync(dbPath))
+  : {};
 
-export const handleAntilink = async (m, sock, logger, isBotAdmins, isAdmins, isCreator) => {
-    const PREFIX = /^[\\/!#.]/;
-    const isCOMMAND = (body) => PREFIX.test(body);
-    const prefixMatch = isCOMMAND(m.body) ? m.body.match(PREFIX) : null;
-    const prefix = prefixMatch ? prefixMatch[0] : '/';
-    const cmd = m.body.startsWith(prefix) ? m.body.slice(prefix.length).split(' ')[0].toLowerCase() : '';
+const saveDB = () => fs.writeFileSync(dbPath, JSON.stringify(antilinkDB, null, 2));
 
-    // Initialize group setting
-    if (!antilinkSettings[m.from]) {
-        antilinkSettings[m.from] = { antilink: !!config.ANTILINK };
+const antiLink = async (m, gss) => {
+  try {
+    const cmd = m.body.toLowerCase().trim();
+    const prefix = config.PREFIX;
 
-        // Optional: Notify group if auto-enabled
-        if (config.ANTILINK && m.isGroup && isBotAdmins) {
-            await sock.sendMessage(m.from, { text: '⚠️ *Antilink is enabled by default in this group.*' });
-        }
+    if (!cmd.startsWith(prefix)) return;
+
+    const command = cmd.slice(prefix.length).trim();
+
+    // Show usage if only "antilink" is typed
+    if (command === "antilink") {
+      return m.reply(`*╭─❍『 ANTILINK USAGE 』❍\n│  ➤ ${prefix}antilink on\n│  ➤ ${prefix}antilink off\n│\n│  Use to enable or disable link blocking.\n│  ᴘᴏᴡᴇʀᴇᴅ ʙʏ ʟᴏʀᴅ ᴊᴏᴇʟ\n╰───────────────━⊷*`);
     }
 
-    // ─── Antilink Command ───────────────────────────────
-    if (cmd === 'dlink') {
-        if (!m.isGroup) {
-            return await sock.sendMessage(m.from, { text: 'This command can only be used in groups.' }, { quoted: m });
-        }
+    // Toggle ON manually
+    if (command === "antilink on") {
+      if (!m.isGroup)
+        return m.reply("*╭─❍『 ERROR 』❍\n│  *GROUPS ONLY!*\n╰───────────────━⊷*");
 
-        if (!isBotAdmins) {
-            return await sock.sendMessage(m.from, { text: 'The bot needs to be an admin to enable antilink.' }, { quoted: m });
-        }
+      const metadata = await gss.groupMetadata(m.from);
+      const isAdmin = metadata.participants.find(p => p.id === m.sender)?.admin;
 
-        if (!isAdmins) {
-            return await sock.sendMessage(m.from, { text: 'Only group admins can use this command.' }, { quoted: m });
-        }
+      if (!isAdmin)
+        return m.reply("*╭─❍『 ERROR 』❍\n│  *ADMIN ONLY COMMAND!*\n╰───────────────━⊷*");
 
-        const args = m.body.slice(prefix.length + cmd.length).trim().split(/\s+/);
-        const action = args[0] ? args[0].toLowerCase() : '';
-
-        if (action === 'on') {
-            antilinkSettings[m.from].antilink = true;
-            return await sock.sendMessage(m.from, { text: '✅ *Antilink enabled!*' }, { quoted: m });
-        }
-
-        if (action === 'off') {
-            antilinkSettings[m.from].antilink = false;
-            return await sock.sendMessage(m.from, { text: '❌ *Antilink disabled!*' }, { quoted: m });
-        }
-
-        return await sock.sendMessage(m.from, {
-            text: `📌 *Usage:*\n- ${prefix}antilink on\n- ${prefix}antilink off`
-        }, { quoted: m });
+      antilinkDB[m.from] = true;
+      saveDB();
+      return m.reply(`*╭─❍『 ANTILINK 』❍\n│  ✅ Activated manually!\n│  Use ${prefix}antilink off to disable.\n│  ᴘᴏᴡᴇʀᴇᴅ ʙʏ ʟᴏʀᴅ ᴊᴏᴇʟ\n╰───────────────━⊷*`);
     }
 
-    // ─── Delete External Links ──────────────────────────
-    if (antilinkSettings[m.from].antilink && m.body.match(/https?:\/\/[^\s]+/)) {
-        if (!isBotAdmins) return;
+    // Toggle OFF
+    if (command === "antilink off") {
+      if (!m.isGroup)
+        return m.reply("*╭─❍『 ERROR 』❍\n│  *GROUPS ONLY!*\n╰───────────────━⊷*");
 
-        const gclink = `https://chat.whatsapp.com/${await sock.groupInviteCode(m.from)}`;
-        const isLinkThisGc = new RegExp(gclink, 'i').test(m.body);
+      const metadata = await gss.groupMetadata(m.from);
+      const isAdmin = metadata.participants.find(p => p.id === m.sender)?.admin;
 
-        if (isLinkThisGc) return; // Allow own group link
-        if (isAdmins || isCreator) return; // Allow admins/owner
+      if (!isAdmin)
+        return m.reply("*╭─❍『 ERROR 』❍\n│  *ADMIN ONLY COMMAND!*\n╰───────────────━⊷*");
 
-        await sock.sendMessage(m.from, { delete: m.key }); // Delete message
-
-        // Optional warning
-        await sock.sendMessage(m.from, { text: '⚠️ *External links are not allowed in this group.*' }, { quoted: m });
+      delete antilinkDB[m.from];
+      saveDB();
+      return m.reply(`*╭─❍『 ANTILINK 』❍\n│  ❌ Deactivated manually!\n│  Use ${prefix}antilink on to enable.\n│  ᴘᴏᴡᴇʀᴇᴅ ʙʏ ʟᴏʀᴅ ᴊᴏᴇʟ\n╰───────────────━⊷*`);
     }
+
+    // Auto-delete links (respects config.ANTILINK global toggle)
+    const isAutoOn = config.ANTILINK === true;
+    const groupEnabled = antilinkDB[m.from];
+    const shouldBlockLinks = isAutoOn || groupEnabled;
+
+    if (shouldBlockLinks && m.isGroup) {
+      const linkRegex = /(https?:\/\/[^\s]+|chat\.whatsapp\.com\/[a-zA-Z0-9]+)/gi;
+      const metadata = await gss.groupMetadata(m.from);
+      const isAdmin = metadata.participants.find(p => p.id === m.sender)?.admin;
+
+      if (!isAdmin && linkRegex.test(m.body)) {
+        await gss.sendMessage(m.from, { delete: m.key });
+        return m.reply("*╭─❍『 ANTILINK 』❍\n│  🚫 Link deleted!\n│  Links are not allowed here!\n╰───────────────━⊷*");
+      }
+    }
+
+  } catch (e) {
+    console.error("AntiLink Error:", e);
+    m.reply("*╭─❍『 ERROR 』❍\n│  ⚠️ Something went wrong!\n╰───────────────━⊷*");
+  }
 };
+
+export default antiLink;
