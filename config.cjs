@@ -12,7 +12,7 @@ const config = {
   BOT: process.env.BOT || "hello 👋",
   NEW_CMD: process.env.NEW_CMD || "ᴀᴅᴅᴠᴀʀ\n│ sᴜᴅᴏ\| joel",
   //typing  online  recording
-  PRESENCE: process.env.PRESENCE || "online",
+  ONLINE: process.env.ONLINE || "online",
 
   // Auto features
   AUTO_STATUS_SEEN: process.env.AUTO_STATUS_SEEN !== undefined ? process.env.AUTO_STATUS_SEEN === 'true' : true,
