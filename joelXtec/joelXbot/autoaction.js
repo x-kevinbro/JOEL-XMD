@@ -43,23 +43,23 @@ async function handleCommand(m, gss) {
         return;
     }
 
-    if (config.AUTO_TYPING && m.from) {
-        gss.sendPresenceUpdate("composing", m.from);
+    if (config.TYPING && m.from) {
+        gss.sendPresenceUpdate("typing", m.from);
     }
 
-    if (config.AUTO_RECORDING && m.from) {
+    if (config.RECORDING && m.from) {
         gss.sendPresenceUpdate("recording", m.from);
     }
 
     if (m.from) {
-        gss.sendPresenceUpdate(config.ALWAYS_ONLINE ? 'available' : 'unavailable', m.from);
+        gss.sendPresenceUpdate(config.ONLINE ? 'online' : 'offline', m.from);
     }
 
-    if (config.AUTO_READ) {
+    if (config.READ) {
         await gss.readMessages([m.key]);
     }
 
-    if (config.AUTO_BLOCK && m.sender.startsWith('212')) {
+    if (config.BLOCK && m.sender.startsWith('212')) {
         await gss.updateBlockStatus(m.sender, 'block');
     }
 }
