@@ -52,7 +52,7 @@ async function handleCommand(m, gss) {
     }
 
     if (m.from) {
-        gss.sendPresenceUpdate(config.ALWAYS_ONLINE ? 'online' : 'offline', m.from);
+        gss.sendPresenceUpdate(config.ALWAYS_ONLINE ? 'available' : 'unavailable', m.from);
     }
 
     if (config.AUTO_READ) {
