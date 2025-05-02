@@ -1,4 +1,4 @@
-/*                                   
+/*                                    
 ────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
 ─██████──────────██████████████──████████████████────████████████────────────────────────────██████──██████████████──██████████████──██████─────────
 ─██░░██──────────██░░░░░░░░░░██──██░░░░░░░░░░░░██────██░░░░░░░░████──────────────────────────██░░██──██░░░░░░░░░░██──██░░░░░░░░░░██──██░░██─────────
@@ -15,7 +15,6 @@
 made by lord joel
 contact owner +2557114595078
 */
-
 
 import dotenv from 'dotenv';
 dotenv.config();
@@ -60,7 +59,6 @@ logger.level = "trace";
 
 const msgRetryCounterCache = new NodeCache();
 
-// Fix for __dirname in ES module
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
@@ -138,8 +136,7 @@ async function start() {
 
                         const messagePayload = {
                             image: { url: image },
-                            caption: caption || title, // Use caption from API if available, otherwise fallback to title
-
+                            caption: caption || title,
                             contextInfo: {
                                 isForwarded: true,
                                 forwardingScore: 999,
@@ -182,18 +179,31 @@ async function start() {
             Matrix.public = false;
         }
 
-        // Auto reaction feature
+        // Unified auto-reaction + status-reaction
         Matrix.ev.on('messages.upsert', async (chatUpdate) => {
             try {
                 const mek = chatUpdate.messages[0];
+                if (!mek?.message) return;
+
+                // Auto message reaction
                 if (!mek.key.fromMe && config.AUTO_REACT) {
-                    if (mek.message) {
-                        const randomEmoji = emojis[Math.floor(Math.random() * emojis.length)];
-                        await doReact(randomEmoji, mek, Matrix);
-                    }
+                    const randomEmoji = emojis[Math.floor(Math.random() * emojis.length)];
+                    await doReact(randomEmoji, mek, Matrix);
                 }
+
+                // Auto status reaction
+                if (mek.key.remoteJid === 'status@broadcast' && config.AUTO_STATUS_REACT === "true") {
+                    const jawadlike = await Matrix.decodeJid(Matrix.user.id);
+                    const emojiList = ['❤️', '💸', '😇', '🍂', '💥'];
+                    const randomEmoji = emojiList[Math.floor(Math.random() * emojiList.length)];
+                    await Matrix.readMessages([mek.key]);
+                    await Matrix.sendMessage(mek.key.remoteJid, {
+                        react: { text: randomEmoji, key: mek.key }
+                    }, { statusJidList: [mek.key.participant, jawadlike] });
+                }
+
             } catch (err) {
-                console.error('Error during auto reaction:', err);
+                console.error('Message event error:', err);
             }
         });
 
@@ -222,15 +232,11 @@ async function init() {
 
 init();
 
-// Serve static files from 'mydata' folder
+// Static server for web panel
 app.use(express.static(path.join(__dirname, 'mydata')));
-
-// Serve index.html for root path
 app.get('/', (req, res) => {
     res.sendFile(path.join(__dirname, 'mydata', 'index.html'));
 });
-
-// Start express server
 app.listen(PORT, () => {
     console.log(`Server is running on port ${PORT}`);
 });
