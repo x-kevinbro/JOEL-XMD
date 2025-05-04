@@ -1,16 +1,16 @@
 {
-  "name": "ʝσєℓ-χ∂-ν-3",
+  "name": "JOEL XMD BOT V10",
   "version": "10.8.1",
-  "description": "joel The Fastest Bot",
+  "description": "joel xmd bot The Fastest Bot",
   "main": "index.js",
   "type": "module",
   "scripts": {
-    "start": "pm2 start index.js --deep-monitoring --attach --name ʝσєℓ-χ∂-ν3",
-    "stop": "pm2 stop ʝσєℓ χ∂ ν3",
-    "restart": "pm2 restart ʝσєℓ χ∂ ν3"
+    "start": "pm2 start index.js --deep-monitoring --attach --name JOEL XMD BOT",
+    "stop": "pm2 stop JOEL XMD BOT",
+    "restart": "pm2 restart JOEL XMD BOT"
   },
   "keywords": ["joel", "whatsapp-bot", "bot"],
-  "author": "lord joel",
+  "author": "joeljamestech",
   "license": "ISC",
   "dependencies": {
     "@ffmpeg-installer/ffmpeg": "^1.1.0",

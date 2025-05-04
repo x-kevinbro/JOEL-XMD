@@ -28,7 +28,7 @@ import {
     useMultiFileAuthState,
 } from '@whiskeysockets/baileys';
 
-import { Handler, Callupdate, GroupUpdate } from './joelXtec/event/index.js';
+import { Handler, Callupdate, GroupUpdate } from './joelXjames/joelXtec/joel.js';
 import express from 'express';
 import pino from 'pino';
 import fs from 'fs';
@@ -129,7 +129,7 @@ async function start() {
                 }
             } else if (connection === 'open') {
                 if (initialConnection) {
-                    console.log(chalk.green("✔️  ᴊᴏᴇʟ-ˣᴍᴅ ɪs ɴᴏᴡ ᴏɴʟɪɴᴇ ᴀɴᴅ ᴘᴏᴡᴇʀᴇᴅ ᴜᴘ"));
+                    console.log(chalk.green("✔️  ᴊᴏᴇʟ-xᴍᴅ ɪs ɴᴏᴡ ᴏɴʟɪɴᴇ ᴀɴᴅ ᴘᴏᴡᴇʀᴇᴅ ᴜᴘ"));
 
                     const startingMessageData = await getStartingMessageData();
 
