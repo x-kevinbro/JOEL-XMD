@@ -1,3 +1,4 @@
+
 import config from '../../config.cjs';
 
 const wcgGames = {};
@@ -20,7 +21,7 @@ const wcg = async (m, sock) => {
     const number = Math.floor(Math.random() * 20) + 1;
     wcgGames[from] = { number, attempts: {}, startedBy: sender };
 
-    return m.reply(`🎯 *WCG Game Started!*\nTry to guess a number between *1 - 20*.\nType a number to play!`);
+    return m.reply(`🎯 *WCG Game Started!*\nGuess a number between *1 - 20*.\nEach player has *15 chances*! Type a number to play.`);
   }
 
   // Reset WCG game
@@ -40,20 +41,26 @@ const wcg = async (m, sock) => {
   const guess = parseInt(m.body.trim());
   if (isNaN(guess) || guess < 1 || guess > 20) return;
 
-  if (game.attempts[sender]) {
-    return m.reply("⏳ You've already guessed! Wait for others or reset.");
+  // Track attempts
+  if (!game.attempts[sender]) {
+    game.attempts[sender] = { guesses: [], count: 0 };
   }
 
-  game.attempts[sender] = guess;
+  if (game.attempts[sender].count >= 15) {
+    return m.reply("❌ You've used all 15 guesses! Wait for others or reset the game.");
+  }
+
+  game.attempts[sender].count++;
+  game.attempts[sender].guesses.push(guess);
 
   if (guess === game.number) {
     delete wcgGames[from];
     return sock.sendMessage(from, {
-      text: `🏆 *Correct Guess!* ${sender} guessed the number *${guess}*!`,
+      text: `🏆 *Correct!* ${sender} guessed the number *${guess}* in ${game.attempts[sender].count} tries!`,
     });
   } else {
-    return m.reply(`❌ Wrong guess! ${guess} is not correct.`);
+    return m.reply(`❌ ${guess} is wrong! (${15 - game.attempts[sender].count} guesses left)`);
   }
 };
-// codes by joeljamestech 
+//codes by lord joel 
 export default wcg;
