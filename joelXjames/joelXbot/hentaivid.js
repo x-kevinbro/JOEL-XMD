@@ -5,7 +5,7 @@ const hentaiHandler = async (m, gss) => {
   const prefix = config.PREFIX;
   const cmd = m.body.startsWith(prefix) ? m.body.slice(prefix.length).split(" ")[0].toLowerCase() : "";
 
-  const validCmds = ["hentaivid", "xnx", "xvideo", "xvid", "hentaivideo"];
+  const validCmds = ["hentaivid", "hentai", "videohentai", "hvid", "hentaivideo"];
   if (!validCmds.includes(cmd)) return;
 
   const senderNumber = m.sender.replace(/\D/g, '');
