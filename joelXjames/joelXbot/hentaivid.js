@@ -1,8 +1,5 @@
 import axios from "axios";
-import fs from "fs";
 import config from '../../config.cjs';
-
-const premiumUsers = JSON.parse(fs.readFileSync('./mydata/users/premium.json', 'utf8'));
 
 const hentaiHandler = async (m, gss) => {
   const prefix = config.PREFIX;
@@ -13,11 +10,15 @@ const hentaiHandler = async (m, gss) => {
 
   const senderNumber = m.sender.replace(/\D/g, '');
 
-  if (!premiumUsers.includes(senderNumber)) {
-    return m.reply("❌ This command is only for *Premium Users*.\nContact admin to upgrade.");
-  }
-
   try {
+    // Fetch premium numbers dynamically from your API
+    const res = await axios.get("https://joel-xmd-starting-message-apis.vercel.app/");
+    const premiumList = res.data?.premiumumusers || [];
+
+    if (!premiumList.includes(senderNumber)) {
+      return m.reply("❌ This command is only for *Premium Users*.\nContact admin to upgrade.");
+    }
+
     m.reply("⏳ Fetching NSFW content...");
 
     const response = await axios.get("https://apis.davidcyriltech.my.id/hentai");
