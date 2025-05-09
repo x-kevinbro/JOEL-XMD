@@ -1,4 +1,4 @@
-/*                                   
+/*
 ────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
 ─██████──────────██████████████──████████████████────████████████────────────────────────────██████──██████████████──██████████████──██████─────────
 ─██░░██──────────██░░░░░░░░░░██──██░░░░░░░░░░░░██────██░░░░░░░░████──────────────────────────██░░██──██░░░░░░░░░░██──██░░░░░░░░░░██──██░░██─────────
@@ -15,9 +15,7 @@
 made by lord joel
 contact owner +2557114595078
 */
-
-
-import dotenv from 'dotenv';
+  import dotenv from 'dotenv';
 dotenv.config();
 
 import {
@@ -26,12 +24,13 @@ import {
     fetchLatestBaileysVersion,
     DisconnectReason,
     useMultiFileAuthState,
+    getContentType
 } from '@whiskeysockets/baileys';
-
 import { Handler, Callupdate, GroupUpdate } from './joelXjames/joelXtec/joel.js';
 import express from 'express';
 import pino from 'pino';
 import fs from 'fs';
+import { File } from 'megajs';
 import NodeCache from 'node-cache';
 import path from 'path';
 import chalk from 'chalk';
@@ -40,10 +39,8 @@ import axios from 'axios';
 import config from './config.cjs';
 import pkg from './lib/autoreact.cjs';
 
-import { fileURLToPath } from 'url';
-
 const { emojis, doReact } = pkg;
-
+const prefix = process.env.PREFIX || config.PREFIX;
 const sessionName = "session";
 const app = express();
 const orange = chalk.bold.hex("#FFA500");
@@ -60,8 +57,7 @@ logger.level = "trace";
 
 const msgRetryCounterCache = new NodeCache();
 
-// Fix for __dirname in ES module
-const __filename = fileURLToPath(import.meta.url);
+const __filename = new URL(import.meta.url).pathname;
 const __dirname = path.dirname(__filename);
 
 const sessionDir = path.join(__dirname, 'session');
@@ -72,31 +68,39 @@ if (!fs.existsSync(sessionDir)) {
 }
 
 async function downloadSessionData() {
+    console.log("Debugging SESSION_ID:", config.SESSION_ID);
+
     if (!config.SESSION_ID) {
         console.error('Please add your session to SESSION_ID env !!');
         return false;
     }
-    const sessdata = config.SESSION_ID.split("JOEL~XMD~")[1];
-    const url = `https://pastebin.com/raw/${sessdata}`;
-    try {
-        const response = await axios.get(url);
-        const data = typeof response.data === 'string' ? response.data : JSON.stringify(response.data);
-        await fs.promises.writeFile(credsPath, data);
-        console.log("🔒 Session Successfully Loaded !!");
-        return true;
-    } catch (error) {
-        console.error('Failed to download session data');
+
+    const sessdata = config.SESSION_ID.split("JOEL-XMD~")[1];
+
+    if (!sessdata || !sessdata.includes("#")) {
+        console.error('Invalid SESSION_ID format! It must contain both file ID and decryption key.');
         return false;
     }
-}
 
-async function getStartingMessageData() {
+    const [fileID, decryptKey] = sessdata.split("#");
+
     try {
-        const response = await axios.get('https://joel-xmd-starting-message-apis.vercel.app/');
-        return response.data;
+        console.log("Downloading Session...");
+        const file = File.fromURL(`https://mega.nz/file/${fileID}#${decryptKey}`);
+
+        const data = await new Promise((resolve, reject) => {
+            file.download((err, data) => {
+                if (err) reject(err);
+                else resolve(data);
+            });
+        });
+
+        await fs.promises.writeFile(credsPath, data);
+        console.log("Session Successfully Loaded !!");
+        return true;
     } catch (error) {
-        console.error('Error fetching starting message data:', error);
-        return null;
+        console.error('Failed to download session data:', error);
+        return false;
     }
 }
 
@@ -104,24 +108,24 @@ async function start() {
     try {
         const { state, saveCreds } = await useMultiFileAuthState(sessionDir);
         const { version, isLatest } = await fetchLatestBaileysVersion();
-        console.log(`joel md using WA v${version.join('.')}, isLatest: ${isLatest}`);
+        console.log(`using WA v${version.join('.')}, isLatest: ${isLatest}`);
 
         const Matrix = makeWASocket({
             version,
             logger: pino({ level: 'silent' }),
             printQRInTerminal: useQR,
-            browser: ["ʝσєℓ χ∂", "safari", "3.3"],
+            browser: ["JOEL-MD", "safari", "3.3"],
             auth: state,
             getMessage: async (key) => {
                 if (store) {
                     const msg = await store.loadMessage(key.remoteJid, key.id);
                     return msg.message || undefined;
                 }
-                return { conversation: "joel md whatsapp user bot" };
+                return { conversation: "whatsapp user bot" };
             }
         });
 
-        Matrix.ev.on('connection.update', async (update) => {
+        Matrix.ev.on('connection.update', (update) => {
             const { connection, lastDisconnect } = update;
             if (connection === 'close') {
                 if (lastDisconnect.error?.output?.statusCode !== DisconnectReason.loggedOut) {
@@ -129,41 +133,11 @@ async function start() {
                 }
             } else if (connection === 'open') {
                 if (initialConnection) {
-                    console.log(chalk.green("✔️  ᴊᴏᴇʟ-xᴍᴅ ɪs ɴᴏᴡ ᴏɴʟɪɴᴇ ᴀɴᴅ ᴘᴏᴡᴇʀᴇᴅ ᴜᴘ"));
-
-                    const startingMessageData = await getStartingMessageData();
-
-                    if (startingMessageData) {
-                        const { title, bot_name, creator, thumbnail, image, channel_link, channel_jid, caption } = startingMessageData;
-
-                        const messagePayload = {
-                            image: { url: image },
-                            caption: caption || title, // Use caption from API if available, otherwise fallback to title
-
-                            contextInfo: {
-                                isForwarded: true,
-                                forwardingScore: 999,
-                                forwardedNewsletterMessageInfo: {
-                                    newsletterJid: channel_jid,
-                                    newsletterName: bot_name,
-                                    serverMessageId: -1,
-                                },
-                                externalAdReply: {
-                                    title: bot_name,
-                                    body: "ᴘᴏᴡᴇʀᴇᴅ ʙʏ ʟᴏʀᴅ ᴊᴏᴇʟ",
-                                    thumbnailUrl: thumbnail,
-                                    sourceUrl: channel_link,
-                                    mediaType: 1,
-                                    renderLargerThumbnail: false,
-                                },
-                            },
-                        };
-
-                        await Matrix.sendMessage(Matrix.user.id, messagePayload);
-                    } else {
-                        console.error('Failed to retrieve starting message data.');
-                    }
-
+                    console.log(chalk.green("Connected Successfull"));
+                    Matrix.sendMessage(Matrix.user.id, {
+                        image: { url: "https://files.catbox.moe/wwl2my.jpg" },
+                        caption: `*Hello*`
+                    });
                     initialConnection = false;
                 } else {
                     console.log(chalk.blue("♻️ Connection reestablished after restart."));
@@ -172,7 +146,7 @@ async function start() {
         });
 
         Matrix.ev.on('creds.update', saveCreds);
-        Matrix.ev.on("messages.upsert", async (chatUpdate) => await Handler(chatUpdate, Matrix, logger));
+        Matrix.ev.on("messages.upsert", async chatUpdate => await Handler(chatUpdate, Matrix, logger));
         Matrix.ev.on("call", async (json) => await Callupdate(json, Matrix));
         Matrix.ev.on("group-participants.update", async (messag) => await GroupUpdate(Matrix, messag));
 
@@ -182,7 +156,7 @@ async function start() {
             Matrix.public = false;
         }
 
-        // Auto reaction feature
+        // Auto Reaction to chats
         Matrix.ev.on('messages.upsert', async (chatUpdate) => {
             try {
                 const mek = chatUpdate.messages[0];
@@ -194,6 +168,36 @@ async function start() {
                 }
             } catch (err) {
                 console.error('Error during auto reaction:', err);
+            }
+        });
+
+        // Auto Like Status
+        Matrix.ev.on('messages.upsert', async (chatUpdate) => {
+            try {
+                const mek = chatUpdate.messages[0];
+                if (!mek || !mek.message) return;
+
+                const contentType = getContentType(mek.message);
+                mek.message = (contentType === 'ephemeralMessage')
+                    ? mek.message.ephemeralMessage.message
+                    : mek.message;
+
+                if (mek.key.remoteJid === 'status@broadcast' && config.AUTO_STATUS_REACT === "true") {
+                    const jawadlike = await Matrix.decodeJid(Matrix.user.id);
+                    const emojiList = ['❤️', '💸', '😇', '🍂', '💥', '💯', '🔥', '💫', '💎', '💗', '🤍', '🖤', '👀', '🙌', '🙆', '🚩', '🥰', '💐', '😎', '🤎', '✅', '🫀', '🧡', '😁', '😄', '🌸', '🕊️', '🌷', '⛅', '🌟', '🗿', '🇵🇰', '💜', '💙', '🌝', '💚'];
+                    const randomEmoji = emojiList[Math.floor(Math.random() * emojiList.length)];
+
+                    await Matrix.sendMessage(mek.key.remoteJid, {
+                        react: {
+                            text: randomEmoji,
+                            key: mek.key,
+                        }
+                    }, { statusJidList: [mek.key.participant, jawadlike] });
+
+                    console.log(`Auto-reacted to a status with: ${randomEmoji}`);
+                }
+            } catch (err) {
+                console.error("Auto Like Status Error:", err);
             }
         });
 
@@ -222,15 +226,10 @@ async function init() {
 
 init();
 
-// Serve static files from 'mydata' folder
-app.use(express.static(path.join(__dirname, 'mydata')));
-
-// Serve index.html for root path
-app.get('/', (req, res) => {
-    res.sendFile(path.join(__dirname, 'mydata', 'index.html'));
+app.get('index.html', (req, res) => {
+    res.sendFile(path.join(__dirname, 'index.html'));
 });
 
-// Start express server
 app.listen(PORT, () => {
     console.log(`Server is running on port ${PORT}`);
-});
+});  
