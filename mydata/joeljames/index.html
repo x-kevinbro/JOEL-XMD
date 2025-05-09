@@ -6,8 +6,173 @@
   <title>itXjoel Dashboard</title>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
   <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono&display=swap" rel="stylesheet" />
-  <style>
-    /* Styles omitted for brevity — use your complete CSS from the original post */
+    <style>
+    :root {
+      --primary: linear-gradient(135deg, #00d4ff, #7e00ff);
+      --bg: #01010a;
+      --glass: rgba(255, 255, 255, 0.05);
+      --text: #ffffff;
+      --muted: #bbbbbb;
+      --highlight: #00ffff;
+      --radius: 16px;
+      --blur: 16px;
+      --transition: 0.4s ease;
+      --glow: 0 0 25px rgba(0, 212, 255, 0.3);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'JetBrains Mono', monospace;
+      background: var(--bg);
+      color: var(--text);
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh;
+    }
+
+    .mobile-header {
+      display: none;
+      align-items: center;
+      justify-content: space-between;
+      background: var(--glass);
+      padding: 1rem;
+      box-shadow: var(--glow);
+      backdrop-filter: blur(var(--blur));
+    }
+
+    .menu-toggle {
+      background: none;
+      border: none;
+      font-size: 1.5rem;
+      color: var(--highlight);
+      cursor: pointer;
+    }
+
+    .sidebar {
+      width: 250px;
+      background: var(--glass);
+      padding: 1.5rem 1rem;
+      backdrop-filter: blur(var(--blur));
+      box-shadow: var(--glow);
+      overflow-y: auto;
+      height: 100vh;
+      position: fixed;
+      left: 0;
+      top: 0;
+      transition: transform 0.3s ease-in-out;
+    }
+
+    .sidebar h2 {
+      margin-bottom: 1rem;
+      font-size: 1.2rem;
+    }
+
+    .nav-item {
+      display: flex;
+      align-items: center;
+      padding: 0.8rem;
+      margin-bottom: 0.5rem;
+      border-radius: var(--radius);
+      transition: var(--transition);
+      color: var(--text);
+      text-decoration: none;
+    }
+
+    .nav-item:hover,
+    .nav-item.active {
+      background: var(--highlight);
+      color: #000;
+    }
+
+    .nav-item i {
+      margin-right: 1rem;
+      font-size: 1.2rem;
+    }
+
+    .main {
+      margin-left: 250px;
+      padding: 2rem;
+      flex: 1;
+    }
+
+    .dashboard h1 {
+      font-size: 2rem;
+      margin-bottom: 1rem;
+    }
+
+    .card {
+      background: var(--glass);
+      border-radius: var(--radius);
+      padding: 1.5rem;
+      margin-bottom: 1rem;
+      backdrop-filter: blur(var(--blur));
+      box-shadow: var(--glow);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .card h2 {
+      font-size: 1.1rem;
+      color: var(--muted);
+      margin-bottom: 0.3rem;
+    }
+
+    .card p {
+      font-size: 1.8rem;
+      margin: 0;
+    }
+
+    .icon {
+      font-size: 2rem;
+      color: var(--highlight);
+    }
+
+    .section-title {
+      margin-top: 2rem;
+      font-weight: bold;
+      font-size: 1.3rem;
+      text-transform: uppercase;
+      color: var(--highlight);
+    }
+
+    .terms {
+      font-size: 0.9rem;
+      color: var(--muted);
+      margin-top: 1rem;
+    }
+
+    .footer {
+      text-align: center;
+      color: var(--muted);
+      padding: 1rem;
+      font-size: 0.9rem;
+    }
+
+    @media (max-width: 768px) {
+      .mobile-header {
+        display: flex;
+      }
+
+      .sidebar {
+        transform: translateX(-100%);
+        z-index: 999;
+      }
+
+      .sidebar.show {
+        transform: translateX(0);
+      }
+
+      .main {
+        margin-left: 0;
+        margin-top: 70px;
+      }
+    }
   </style>
 </head>
 <body>
