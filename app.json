@@ -23,7 +23,7 @@
       "required": false,
       "value": "true"
         },
-    "AUTOLIKE_STATUS": {
+    "AUTO_STATUS_REACT": {
       "description": "Make it true if you want bot to read and like status else leave blank",
       "required": false,
       "value": "true"
