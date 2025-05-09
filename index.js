@@ -241,7 +241,7 @@ async function init() {
 init();
 
 // EXPRESS ROUTES
-const htmlDir = path.join(__dirname, 'windows', 'mydata');
+const htmlDir = path.join(__dirname, 'mydata', 'joeljames');
 
 app.get('/', (req, res) => {
     res.sendFile(path.join(htmlDir, 'index.html'));
