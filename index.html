@@ -1,4 +1,4 @@
-<!DOCTYPE >
+<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
@@ -129,15 +129,14 @@
   </style>
 </head>
 <body>
-   <h1>Support Center</h1>
+  <h1>Support Center</h1>
 
- <div id="jorl"></div>
-  
-    <div class="card">
-      <p>We're here to help! Reach out if you're facing issues, have questions, or want to request new features.</p>
-      <p>Start by checking the <a href="info.html" style="color: var(--accent);">Info Page</a> for common commands and setup tips.</p>
-    </div>
-  </section>
+  <div id="jorl"></div>
+
+  <div class="card">
+    <p>We're here to help! Reach out if you're facing issues, have questions, or want to request new features.</p>
+    <p>Start by checking the <a href="info.html" style="color: var(--accent);">Info Page</a> for common commands and setup tips.</p>
+  </div>
 
   <section>
     <h2>Contact Developer</h2>
@@ -150,23 +149,21 @@
         <a href="https://whatsapp.com/channel/0029Vak2PevK0IBh2pKJPp2K" target="_blank" aria-label="WhatsApp"><i class="fab fa-whatsapp"></i></a>
       </div>
     </div>
- 
-  <h2>Need Help?</h2>
+  </section>
 
- <div id="chatBox"></div>
-  <form onsubmit="handleJoelAI(event)">
-    <input type="text" id="prompt" placeholder="ASK ME" required />
-    <button type="submit">ask</button>
-  </form>
-</div>
-    </div>
+  <section>
+    <h2>Need Help?</h2>
+    <div id="chatBox"></div>
+    <form onsubmit="handleJoelAI(event)">
+      <input type="text" id="prompt" placeholder="ASK ME" required />
+      <button type="submit">ask</button>
+    </form>
   </section>
 
   <script>
     const chatBox = document.getElementById("chatBox");
     const storageKey = "joel_ai_chat_history";
 
-    // Load saved conversation
     window.onload = () => {
       const saved = JSON.parse(localStorage.getItem(storageKey)) || [];
       saved.forEach(msg => addMessage(msg.text, msg.sender));
