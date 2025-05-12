@@ -84,6 +84,12 @@
       outline: 2px solid var(--accent);
     }
 
+    #joel-response {
+      margin-top: 1rem;
+      color: var(--accent);
+      font-style: italic;
+    }
+
     @media (max-width: 768px) {
       body {
         padding: 1rem;
@@ -108,25 +114,59 @@
     <div class="card">
       <p>Direct support and feature requests:</p>
       <div class="socials">
-        <a href="https://github.com/joeljamestech" target="_blank"><i class="fab fa-github"></i></a>
-        <a href="https://youtube.com/@joeltech255" target="_blank"><i class="fab fa-youtube"></i></a>
-        <a href="https://tiktok.com/@joeljamestech" target="_blank"><i class="fab fa-tiktok"></i></a>
-        <a href="https://whatsapp.com/channel/0029Vak2PevK0IBh2pKJPp2K" target="_blank"><i class="fab fa-whatsapp"></i></a>
+        <a href="https://github.com/joeljamestech" target="_blank" aria-label="GitHub"><i class="fab fa-github"></i></a>
+        <a href="https://youtube.com/@joeltech255" target="_blank" aria-label="YouTube"><i class="fab fa-youtube"></i></a>
+        <a href="https://tiktok.com/@joeljamestech" target="_blank" aria-label="TikTok"><i class="fab fa-tiktok"></i></a>
+        <a href="https://whatsapp.com/channel/0029Vak2PevK0IBh2pKJPp2K" target="_blank" aria-label="WhatsApp"><i class="fab fa-whatsapp"></i></a>
       </div>
     </div>
   </section>
 
   <section>
-    <h2>Send a Message</h2>
+    <h2>Ask Joel AI</h2>
     <div class="card">
-      <form action="https://formspree.io/f/mwkgygjb" method="POST">
-        <input type="text" name="name" placeholder="Your Name" required />
-        <input type="email" name="email" placeholder="Your Email (optional)" />
-        <textarea name="message" rows="5" placeholder="Write your message..." required></textarea>
-        <button class="button" type="submit">Send Message</button>
+      <p>Have questions about the WA bot? Ask Joel AI below:</p>
+      <form id="joel-form" onsubmit="handleJoelAI(event)">
+        <input type="text" id="prompt" placeholder="Type your question..." required />
+        <button class="button" type="submit">Ask Joel AI</button>
       </form>
+      <div id="joel-response"></div>
     </div>
   </section>
+
+  <script>
+    async function handleJoelAI(event) {
+      event.preventDefault();
+      const input = document.getElementById("prompt");
+      const prompt = input.value.trim().toLowerCase();
+      const responseBox = document.getElementById("joel-response");
+      responseBox.textContent = "Thinking...";
+
+      // Custom replies
+      const customReplies = {
+        "who are you": "I'm Joel XMD Bot AI assistant, here to help you with anything WA bot related!",
+        "what is your name": "My name is Joel XMD AI assistant.",
+        "creator": "I was created by LORD_JOEL using JOEL-MD-BOT as base."
+      };
+
+      if (customReplies[prompt]) {
+        responseBox.textContent = customReplies[prompt];
+        return;
+      }
+
+      const apiUrl = `https://api.paxsenix.biz.id/ai/gemini-realtime?text=${encodeURIComponent(prompt)}&session_id=ZXlKaklqb2lZMTg0T0RKall6TTNNek13TVdFNE1qazNJaXdpY2lJNkluSmZNbU01TUdGa05ETmtNVFF3WmpNNU5pSXNJbU5vSWpvaWNtTmZZVE16TURWaE1qTmpNR1ExTnpObFl5Sjk`;
+
+      try {
+        const res = await fetch(apiUrl);
+        const data = await res.json();
+        responseBox.textContent = data.message || "No response.";
+      } catch (err) {
+        responseBox.textContent = "contact my owner for more info wa.me/+255781144539.";
+      }
+
+      input.value = "";
+    }
+  </script>
 
 </body>
 </html>
