@@ -36,7 +36,7 @@ src="mydata/media/joelXtec.jpg"/>
 
 
 
-<a href='https://joel-xmd-mega-amaxmai-e14d9465a1cd.herokuapp.com/pair' target="_blank"><img alt='joel' src='https://img.shields.io/badge/PAIR CODE-h?color=navy&style=for-the-badge&logo=visualstudiocode'/></a></p>
+<a href='https://joel-xmd-mega-amaxmai-e14d9465a1cd.herokuapp.com/qr' target="_blank"><img alt='joel' src='https://img.shields.io/badge/QR CODE-h?color=navy&style=for-the-badge&logo=visualstudiocode'/></a></p>
 
 
  
