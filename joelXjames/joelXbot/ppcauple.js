@@ -10,7 +10,7 @@ const ppcoupleCmd = async (m, sock) => {
 
   if (cmd !== 'ppcouple') return;
 
-  const filePath = path.resolve('../../joel-xmd-medias/joel-xmd-anime-picsjoel-xmd-randompics/ppcauple.json');
+  const filePath = path.resolve('../../joel-xmd-medias/joel-xmd-randompics/ppcauple.json');
 
   let data;
   try {
@@ -28,7 +28,7 @@ const ppcoupleCmd = async (m, sock) => {
   try {
     await sock.sendMessage(m.from, {
       image: { url: random.male },
-      caption: `${caption}\n\n👦 Male`,
+      caption: `for 👦 Male`,
       contextInfo: {
         externalAdReply: {
           title: "ᴊᴏᴇʟ xᴅ ʙᴏᴛ",
@@ -43,7 +43,7 @@ const ppcoupleCmd = async (m, sock) => {
 
     await sock.sendMessage(m.from, {
       image: { url: random.female },
-      caption: `${caption}\n\n👧 Female`,
+      caption: `for 👧 Female`,
       contextInfo: {
         externalAdReply: {
           title: "ᴊᴏᴇʟ xᴅ ʙᴏᴛ",
