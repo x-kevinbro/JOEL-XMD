@@ -35,7 +35,7 @@ const randompic = async (m, sock) => {
 
   if (!validCommands.includes(cmd)) return;
 
-  const filePath = path.resolve(`../../joel-xmd-medias/joel-xmd-anime-picsjoel-xmd-randompics/${cmd}.json`);
+  const filePath = path.resolve(`../../joel-xmd-medias/joel-xmd-randompics/${cmd}.json`);
 
   let imageList;
 
