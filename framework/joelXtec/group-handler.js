@@ -1,6 +1,5 @@
 
 
-
 import moment from 'moment-timezone';
 import config from '../../config.cjs';
 export default async function GroupParticipants(sock, { id, participants, action }) {
@@ -24,22 +23,29 @@ export default async function GroupParticipants(sock, { id, participants, action
                     const joinDate = moment.tz('Asia/Tanzania').format('DD/MM/YYYY');
                     const membersCount = metadata.participants.length;
             sock.sendMessage(id, {
-               text: `╭───〔 *ᴊᴏᴇʟ ᴡᴇʟᴄᴏᴍᴇ ᴢᴏɴᴇ* 〕───╮
-│  
-│  ✦ ʜᴇʏ @${userName}!
-│  ✦ ᴡᴇʟᴄᴏᴍᴇ ᴛᴏ *${metadata.subject}*
-│  ✦ ʏᴏᴜ'ʀᴇ ᴏᴜʀ ${membersCount}ᴛʜ ᴍᴇᴍʙᴇʀ
-│  ✦ ᴊᴏɪɴᴇᴅ: ${joinTime} | ${joinDate}
-│  
-╰─────────────────────━⊷"`, contextInfo: {
+               text: `
+┌─❖
+│『  *Hi..!! 🐦*  』
+└┬
+ ◎ 「  @${userName} 」
+ │ ➪  *Wᴇʟᴄᴏᴍᴇ Tᴏ*
+ ◎      ${metadata.subject} 
+ │ ➪  *Mᴇᴍʙᴇʀ :*
+ ◎      ${membersCount}th
+ │ ➪  *Jᴏɪɴᴇᴅ :*
+ ◎      ${joinTime} ${joinDate}
+ │ ➪  *Support by Subscribe My Channel :*
+ ◎      youtube.com/@joeljamestech255
+ └─────────────||
+`, contextInfo: {
                   mentionedJid: [jid],
                   externalAdReply: {
                      title: `ᴡᴇʟᴄᴏᴍᴇ ᴛᴏ ᴏᴜʀ ɢʀᴏᴜᴘ`,
                      mediaType: 1,
                      previewType: 0,
                      renderLargerThumbnail: true,
-                     thumbnailUrl: metadata.subject,
-                     sourceUrl: 'https://github.com/joeljamestech2/JOEL-XM'
+                     thumbnailUrl: profile,
+                     sourceUrl: 'https://github.com/joeljamestech2/JOEL-XMD'
                   }
                }
             })
@@ -49,14 +55,21 @@ export default async function GroupParticipants(sock, { id, participants, action
                     const leaveDate = moment.tz('Africa/Tanzaniaa').format('DD/MM/YYYY');
                     const membersCount = metadata.participants.length;
             sock.sendMessage(id, {
-               text: `╭──〔 *ᴊᴏᴇʟ ɢᴏᴏᴅʙʏᴇ ᴘᴏʀᴛᴀʟ* 〕──╮
-│  
-│  ✦ ꜰᴀʀᴇᴡᴇʟʟ @${userName}
-│  ✦ ʏᴏᴜ ʟᴇғᴛ *${metadata.subject}*
-│  ✦ ɴᴏᴡ ᴡᴇ ᴀʀᴇ ${membersCount} sᴛʀᴏɴɢ
-│  ✦ ʟᴇꜰᴛ ᴀᴛ: ${leaveTime} | ${leaveDate}
-│  
-╰─────────────────────━⊷"`, contextInfo: {
+               text: `
+┌─❖
+│『  *Gᴏᴏᴅʙʏᴇ..!! 🍁*  』 
+└┬
+ ◎ 「  @${userName}   」
+ │ ➪  *Lᴇғᴛ ғʀᴏᴍ*
+ ◎      ${metadata.subject} 
+ │ ➪  *Mᴇᴍʙᴇʀ :*
+ ◎      ${membersCount}th
+ │ ➪  *Tɪᴍᴇ :*
+ ◎      ${leaveTime} ${leaveDate}
+ │ ➪  *Support by Subscribe My Channel :*
+ ◎      youtube.com/@joeljamestech255
+ └─────────────||
+`, contextInfo: {
                   mentionedJid: [jid],
                   externalAdReply: {
                      title: `ɢᴏᴏᴅʙʏᴇ ᴀ ғᴏʟʟᴇɴ sᴏʟᴅɪᴇʀ`,
