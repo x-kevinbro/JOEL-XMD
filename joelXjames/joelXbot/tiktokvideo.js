@@ -3,7 +3,7 @@ import path from 'path';
 import config from '../../config.cjs';
 
 const validCmds = [
-  'bocil', 'gheayub', 'kayes', 'notnot',
+  'bocil', 'gheayub', 'kayes', 'notnotvid',
   'panrika', 'santuy', 'tiktokgirl', 'ukihty'
 ];
 
@@ -15,7 +15,7 @@ const tiktovideoCmd = async (m, sock) => {
 
   if (!validCmds.includes(cmd)) return;
 
-  const filePath = path.resolve(`../../joel-xmd-medias/tiktokvids/${cmd}.json`);
+  const filePath = path.resolve(`../../joel-xmd-medias/tiktokvideo/${cmd}.json`);
   let videoList;
 
   try {
