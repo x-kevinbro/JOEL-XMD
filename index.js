@@ -29,7 +29,7 @@ import {
     useMultiFileAuthState,
     getContentType
 } from '@whiskeysockets/baileys';
-import { Handler, Callupdate, GroupUpdate } from './joelXjames/joelXtec/joel.js';
+import { Handler, Callupdate, GroupUpdate } from './framework/joelXtec/joel.js';
 import express from 'express';
 import pino from 'pino';
 import fs from 'fs';
