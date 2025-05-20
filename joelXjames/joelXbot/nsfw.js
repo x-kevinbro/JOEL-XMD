@@ -32,7 +32,7 @@ const nsfwCmd = async (m, sock) => {
 
   if (!allowedGroups.includes(m.from)) {
     await sock.sendMessage(m.from, {
-      text: `⚠️ This feature is not enabled in this group.\n\nType *${prefix}nsfw on* to enable.`
+      text: `⚠️ This feature is not enabled in this group.\n contact owner to enable`
     }, { quoted: m });
     return;
   }
