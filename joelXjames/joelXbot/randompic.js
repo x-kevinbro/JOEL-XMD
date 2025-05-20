@@ -16,7 +16,7 @@ const validCommands = [
   'kayes',
   'kpop',
   'notnot',
-  'ppcauple',
+  'ppcauple2',
   'profile',
   'pubg',
   'rose',
